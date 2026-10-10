@@ -5,5 +5,6 @@ This index contains only identified work. There is no confirmed feature roadmap 
 | ID | Task | Status | Plan |
 | --- | --- | --- | --- |
 | `001-project-foundation` | Establish persistent project documentation and AI task workflow | completed | [Plan 001](001-project-foundation.md) |
+| `002-react-api-auth` | Step 1: React client and API registration, login, and logout | completed | [Plan 002](002-react-api-auth.md) |
 
 Status definitions: `proposed`, `ready`, `in_progress`, `blocked`, `completed`, `cancelled`. Reserve the next sequential ID for the next substantial, confirmed need.

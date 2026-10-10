@@ -12,4 +12,13 @@ import './bootstrap';
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-import './components/Example';
+import '../css/auth.css';
+import { createElement } from 'react';
+import { createRoot } from 'react-dom/client';
+import AuthApp from './components/AuthApp';
+
+const rootElement = document.getElementById('auth-app');
+
+if (rootElement) {
+	createRoot(rootElement).render(createElement(AuthApp));
+}
