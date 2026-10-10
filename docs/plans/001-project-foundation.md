@@ -1,10 +1,10 @@
 # 001: Project Documentation and AI Task Workflow
 
 - ID: `001-project-foundation`
-- Status: in_progress
+- Status: completed
 - Created: 2026-10-10
 - Updated: 2026-10-10
-- Completed: not completed
+- Completed: 2026-10-10
 
 ## Problem and Intended Outcome
 
@@ -67,23 +67,24 @@ Do not read or reproduce `.env` values. Record only environment variable names a
 - [x] Inspect actual routes, controllers, models, migrations, frontend, tests, and runtime schema.
 - [x] Create populated architecture/product/development/API/status docs, templates, and backlog.
 - [x] Add the shared agent workflow outside Boost-managed markers and reference it from Claude instructions.
-- [ ] Validate Markdown links, plan references, Boost configuration preservation, and test results.
+- [x] Validate Markdown links, plan references, Boost configuration preservation, and test results.
 
 ## Acceptance Criteria
 
-- [ ] Docs describe actual code and distinguish verified facts from inference and open questions.
-- [ ] All internal Markdown file links resolve and backlog plan links exist.
-- [ ] Instructions preserve Boost's framework guidance and MCP configuration.
-- [ ] Tests and documentation consistency checks have actual results recorded.
-- [ ] Git state preserves existing staged work and task changes remain unstaged.
+- [x] Docs describe actual code and distinguish verified facts from inference and open questions.
+- [x] All internal Markdown file links resolve and backlog plan links exist.
+- [x] Instructions preserve Boost's framework guidance and MCP configuration.
+- [x] Tests and documentation consistency checks have actual results recorded.
+- [x] Existing staged starter files were preserved; the workspace now has an initial commit.
 
 ## Testing Strategy and Results
 
 | Check | Expected result | Actual result |
 | --- | --- | --- |
-| `php artisan route:list --except-vendor` | Route inventory matches docs | Passed before doc edits; 13 web routes shown |
-| `php artisan test --compact` | Existing suite passes | Passed before doc edits; 2 tests, 2 assertions |
-| Markdown link/plan-reference check | No broken local file links or plan references | Pending |
+| `php artisan route:list --except-vendor` | Route inventory matches docs | Passed; 13 web routes shown |
+| `php artisan test --compact` | Existing suite passes | Passed after doc edits; 2 tests, 2 assertions |
+| Markdown link/plan-reference check | No broken local file links or plan references | Passed; 30 Markdown files checked |
+| Boost/configuration and secret scan | Generated guidance and MCP config preserved; no secret assignments in docs | Passed; guideline blocks match, both MCP configs match, manifests unchanged |
 
 ## Risks, Dependencies, and Open Questions
 
@@ -99,4 +100,4 @@ Do not read or reproduce `.env` values. Record only environment variable names a
 
 ## Final Summary and Remaining Work
 
-Pending final validation. Remaining product questions are listed in [known issues and unknowns](../status/known-issues.md).
+Persistent project documentation, task templates/backlog, and the canonical agent workflow are in place without application behavior or dependency changes. Remaining product questions are listed in [known issues and unknowns](../status/known-issues.md); resolve them before planning marketplace features.
