@@ -2,7 +2,8 @@
 
 ## 2026-10-11
 
-- Addressed Vercel's missing `dist` output error by setting the framework preset to `Other` and the output directory to Laravel's `public/` in `vercel.json`. Updated Plan 015 and deployment status docs; Preview validation remains pending.
+- Addressed Vercel's missing `dist` output error by setting the framework preset to `Other` and the output directory to Laravel's `public/` in `vercel.json`; updated Plan 015 and deployment status docs.
+- Pushed commit `b3283de` to `main`; Vercel Production deployment `dpl_JDJjUB9RkLezhKzoqsyMGEtumu1L` reached `READY`, confirming the output-directory build error no longer blocks deployment. Build-log access was denied, so migration output and runtime/API/asset checks remain unverified.
 
 - Updated Vercel deployment documentation and Plan 014 for Production-only database migrations; confirmed demo seeders are not required in Production.
 - Added a Vercel Production-only migration command after the frontend build. It configures the Aiven CA, skips Preview/local environments, and does not invoke seeders. Confirmed the workspace connection is local MySQL, so no Production migration was run.

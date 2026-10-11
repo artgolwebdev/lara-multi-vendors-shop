@@ -62,7 +62,7 @@ The `FILESYSTEM_DISK` for product uploads is **not production-ready**. The app c
 - `QUEUE_CONNECTION=sync` executes the current simulated notification job during the request. Vercel does not supply a persistent `queue:work` process. If real asynchronous work is required, provide a managed queue and an always-on worker outside the function.
 - Send logs to `stderr`; avoid file-based logging and file cache/session drivers.
 - Vite's `public/build` output is ignored by Git, so it must be built by the Composer Vercel build hook. `bootstrap/cache` package-discovery files are build artifacts; do not write there from a request.
-- The supplied deployment log showed Vite finishing successfully and Vercel then failing because it expected a `dist` directory. The repository configuration now explicitly uses Framework Preset `Other` and `public` output to align with Laravel. A new Preview build is still required to confirm the fix; the prior failure's full logs and possible migration-hook side effects were not available for inspection.
+- The supplied deployment log showed Vite finishing successfully and Vercel then failing because it expected a `dist` directory. After setting Framework Preset `Other` and `public` output in `vercel.json`, Production deployment `dpl_JDJjUB9RkLezhKzoqsyMGEtumu1L` for commit `b3283de` reached `READY`. Vercel build logs were denied to the connected account, so the migration command's output and runtime/API/static-asset smoke checks remain unverified.
 - Local uploads and the `public/storage` symlink are not durable deployment storage.
 
 ## Rollout checklist
