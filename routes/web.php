@@ -2,6 +2,20 @@
 
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/run-seeder', function () {
+    
+    Artisan::call('db:seed', [
+        '--force' => true,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Database seeded successfully',
+        'output' => Artisan::output(),
+    ]);
+});
 
 Route::get('/', function () {
     return view('store-app');
