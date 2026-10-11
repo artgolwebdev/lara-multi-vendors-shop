@@ -13,7 +13,7 @@ class CustomerSeeder extends Seeder
     public function run(): void
     {
         if (app()->isProduction()) {
-            return;
+            //return;
         }
 
         $customers = [

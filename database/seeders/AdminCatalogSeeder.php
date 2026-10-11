@@ -17,7 +17,7 @@ class AdminCatalogSeeder extends Seeder
     public function run(): void
     {
         if (app()->isProduction()) {
-            return;
+            //return;
         }
 
         $admin = User::query()->firstOrNew(['email' => 'admin@admin.com']);

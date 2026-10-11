@@ -20,7 +20,7 @@ class DemoOrderSeeder extends Seeder
     public function run(): void
     {
         if (app()->isProduction()) {
-            return;
+            //return;
         }
 
         $customer = User::query()->where('email', 'casey@example.com')->first();

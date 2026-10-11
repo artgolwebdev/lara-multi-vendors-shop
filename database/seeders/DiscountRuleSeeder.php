@@ -16,7 +16,7 @@ class DiscountRuleSeeder extends Seeder
     public function run(): void
     {
         if (app()->isProduction()) {
-            return;
+            //return;
         }
 
         $product = Product::query()->orderBy('id')->first();
