@@ -2,6 +2,12 @@
 
 ## 2026-10-11
 
+- Updated Vercel deployment documentation and Plan 014 for Production-only database migrations; confirmed demo seeders are not required in Production.
+- Added a Vercel Production-only migration command after the frontend build. It configures the Aiven CA, skips Preview/local environments, and does not invoke seeders. Confirmed the workspace connection is local MySQL, so no Production migration was run.
+
+## 2026-10-11
+
+- Started implementing Plan 014. The supplied Vercel Preview URL is behind Vercel Authentication; the app alias reaches PHP 8.5.2/Laravel, but `/api/categories` returns a database `QueryException` with a trace in its response. Raw error contents were not retained. Vercel project access was denied to the connected account, so Production `APP_DEBUG=false`, deployment logs, and DB/TLS diagnosis require authorized project access.
 - Added proposed Plan 014 for investigating Vercel Preview HTML responses and completing the Laravel 13/React/Vite/Aiven deployment review. Corrected the recorded React Router DOM version to 7.18.4 from the installed package tree.
 - Continued Plan 013: completed the local configuration/runtime prerequisite audit. XAMPP PHP 8.4.23 has `pdo_mysql`, OpenSSL, and the PDO MySQL verification option; the Aiven CA parses, is marked as a CA, and is within its current validity window. Vercel build/runtime and live Aiven verification remain outstanding.
 - Checked the user-provided Vercel Preview's `/up` endpoint with a read-only HTTPS GET; it returned HTTP 200 with HTML, so no Laravel health or database result was established.

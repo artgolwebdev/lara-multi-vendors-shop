@@ -12,15 +12,17 @@ This file separates verified implementation limits from questions. It does not c
 - Checkout vendor selection defaults to `customer_choice`; `lowest_price` is configurable. For assignments requiring automatic cheapest-offer selection, use or default to the lowest-price policy.
 - Notifications are queued and simulated by logging. Local auto-processing can drain jobs after the response; non-local environments need an operational queue worker.
 - Discount stacking applies every matching rule cumulatively per line (capped at the line subtotal).
-- No production deployment has been completed and no CI/CD deployment automation is configured.
+- A Vercel app alias currently serves the PHP/Laravel function, but a production rollout has not been verified end to end; no CI/CD deployment automation is documented.
 - Initial Vercel runtime scaffolding now exists, but deployment and Aiven MySQL connectivity are unverified. Product image uploads still use local storage and are not durable on Vercel; persistent object storage must be selected before production image uploads are enabled. See [Vercel deployment preparation](../development/deployment-vercel.md) and [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md).
-- The provided Vercel Preview returned HTTP 200 with HTML for `/up` and `/api/categories`; the latter is expected to return JSON. This does not prove Laravel or Aiven health. The source of the response (deployment protection, static output, routing, or function behavior) is unresolved; see [Plan 014](../plans/014-vercel-deployment-investigation-plan.md).
+- The provided Vercel Preview deployment URL is behind Vercel Authentication: unauthenticated `/up` redirects to SSO and `/api/categories` returns Vercel 401. The user-provided app alias reaches PHP 8.5.2/Laravel; `/up` returns the built-in health view for browser requests and JSON when requested. `/api/categories` returns 500 with a database `QueryException`; a response trace was present. Ensure Production `APP_DEBUG=false` immediately and use authorized Vercel logs to diagnose the DB/TLS error. See [Plan 014](../plans/014-vercel-deployment-investigation-plan.md).
 - Email verification files and a user timestamp column exist, but no verification routes appeared in the inspected route list.
+- Vercel Production migration hook is implemented but has not yet run against Aiven. The current workspace targets local MySQL, and the Vercel CLI is not installed. See [Vercel deployment preparation](../development/deployment-vercel.md).
 
 ## Open Questions
 
 - Which database should local, test, and deployed environments use? The Boost-connected environment reports MySQL, while repository defaults select SQLite.
-- What is the deployment target and how should production assets, migrations, sessions, queues, cache, and email be managed?
+- Does the Vercel Production build expose `VERCEL_ENV=production` and have access to Aiven with the configured CA so the migration hook can run?
+- How should production assets, sessions, queues, cache, and email be managed?
 - Should email verification be enabled, or are the present files/column unused starter scaffolding?
 
 The user has confirmed the phased marketplace scope. Remaining questions concern environment/deployment details and future per-vendor inventory behavior, not whether to build the requested marketplace. See [requirements](../product/requirements.md) and [backlog](../plans/backlog.md).

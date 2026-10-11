@@ -54,7 +54,8 @@
         "vercel": [
             "@php artisan package:discover --ansi",
             "npm ci",
-            "npm run build"
+            "npm run build",
+            "@php artisan deployment:migrate --no-interaction"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
