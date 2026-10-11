@@ -2,6 +2,13 @@
 
 ## 2026-10-11
 
+- Implemented plan 009: aligned login, registration, and password recovery with the Goodgoods design system.
+  - Mounted the React auth experience at `/login` and `/register` while preserving `/account`; added route-aware modes, shared form primitives, field errors, remember-me, password visibility, and recovery navigation.
+  - Preserved Laravel intended destinations and validated explicit auth redirects as same-origin URLs.
+  - Restyled the Laravel UI layout and password recovery/reset views; added route, redirect, remember-cookie, and page coverage (146 tests, 662 assertions).
+  - Verified Pint and production asset build; Vite reports existing Sass/Tailwind deprecation and minifier warnings.
+- Fixed storefront-to-auth navigation after the checkout sign-in CTA was intercepted by the storefront React Router. Cart registration promotions, checkout, order confirmation, and the signed-in account header now perform full-page navigation to the separately mounted auth app.
+- Restored the storefront cart page's `Link` import for its in-app checkout and shop links; rebuilt the production bundle.
 - Implemented plan 008: UX/UI polish, design tokens, shared UI primitives, and checkout/confirmation fixes.
   - Added CSS custom property tokens (`resources/css/tokens.css`) and neutral `gg-*` primitives (`resources/css/ui.css`, `resources/js/components/ui/*`).
   - Fixed order confirmation crash (`ReferenceError: user is not defined`), added order details, delivery card, per-vendor sub-orders with applied discount rule labels, and clearCart dispatch on completion.

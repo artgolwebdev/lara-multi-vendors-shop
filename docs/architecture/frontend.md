@@ -2,7 +2,8 @@
 
 ## Current Stack (Verified)
 
-- Blade renders minimal SPA mount hosts; each page route returns a host view and React renders the app. The storefront SPA is mounted at `/`, `/shop`, `/categories`, `/categories/{category}`, `/products/{product}`, `/cart`, `/checkout`, and `/order-confirmation/{order}` (`store-app`); the auth SPA is mounted at `/account` (`auth-app`); the admin SPA is mounted at `/admin/*` (`admin-app`).
+- Blade renders minimal SPA mount hosts; each page route returns a host view and React renders the app. The storefront SPA is mounted at `/`, `/shop`, `/categories`, `/categories/{category}`, `/products/{product}`, `/cart`, `/checkout`, and `/order-confirmation/{order}` (`store-app`); the auth SPA is mounted at `/login`, `/register`, and `/account` (`auth-app`); the admin SPA is mounted at `/admin/*` (`admin-app`). Password reset and reset confirmation forms render with the Goodgoods Blade layout.
+- Storefront links to the separately mounted auth app use normal page navigation so the storefront React Router does not try to resolve `/account`, `/login`, or `/register` within its own route table.
 - `resources/js/app.js` mounts each React experience when its element id (`#store-app`, `#auth-app`, `#admin-app`) is present. It imports `tokens.css` (CSS variables design tokens) and `ui.css` (neutral shared primitive classes) before application stylesheets (`store.css`, `admin.css`, `auth.css`). React calls same-origin `/api` endpoints through Axios.
 - Shared React primitives reside in `resources/js/components/ui/` (`Button`, `Card`, `Field`, `Input`, `Select`, `Textarea`, `Alert`, `Badge`, `PageHeader`, `Money`, `Table`, `EmptyState`, `Skeleton`, `Steps`) and provide consistent accessibility, styling, and tabular data displays without external component libraries.
 - Bootstrap 5 is imported through Sass. Tailwind CSS 4 is imported from `resources/css/app.css` and processed through the Tailwind Vite plugin.

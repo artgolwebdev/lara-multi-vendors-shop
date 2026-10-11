@@ -81,12 +81,12 @@ export default function OrderConfirmationPage() {
                     <div className="store-confirmation-actions">
                         <Link to="/shop" className="store-button">Continue shopping</Link>
                         {!user && (
-                            <Link
-                                to={`/account?redirect=${encodeURIComponent(`/order-confirmation/${orderId}`)}`}
+                            <a
+                                href={`/account?redirect=${encodeURIComponent(`/order-confirmation/${orderId}`)}`}
                                 className="store-link-button"
                             >
                                 Sign in to your account
-                            </Link>
+                            </a>
                         )}
                     </div>
                 </div>
@@ -111,7 +111,7 @@ export default function OrderConfirmationPage() {
                 <div className="store-confirmation-actions">
                     <Link to="/shop" className="store-button">Continue shopping</Link>
                     {user ? (
-                        <Link to="/account" className="store-link-button">View your orders</Link>
+                        <a href="/account" className="store-link-button">View your orders</a>
                     ) : (
                         <span className="store-text-muted" style={{ fontSize: '13px' }}>
                             Save your confirmation link or keep this page open

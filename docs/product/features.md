@@ -4,12 +4,12 @@ This inventory describes code verified in the repository, not an intended market
 
 | Capability | Current implementation | Evidence |
 | --- | --- | --- |
-| React authentication page | `/account` serves the Vite-mounted React registration/login screen | `routes/web.php`, `resources/views/auth-app.blade.php`, `resources/js/components/AuthApp.jsx` |
+| React authentication page | `/login`, `/register`, and `/account` serve the Vite-mounted Goodgoods sign-in/registration experience and customer dashboard | `routes/web.php`, `app/Http/Controllers/Auth/`, `resources/views/auth-app.blade.php`, `resources/js/components/AuthApp.jsx` |
 | API registration/login/logout | Sanctum stateful JSON endpoints; registration/login are throttled | `routes/api.php`, `app/Http/Controllers/Api/AuthController.php` |
 | Authenticated API identity | `GET /api/user` returns the public user resource | `routes/api.php`, `app/Http/Resources/UserResource.php` |
-| Web registration and login | Laravel UI `Auth::routes()` and its existing auth controllers/views remain available | `routes/web.php`, `app/Http/Controllers/Auth/` |
+| Web registration and login | Laravel UI web POST routes remain available; GET login/registration mount the React auth app | `routes/web.php`, `app/Http/Controllers/Auth/` |
 | Authenticated home | `/home` uses `HomeController`; constructor applies `auth` middleware | `routes/web.php`, `app/Http/Controllers/HomeController.php` |
-| Password reset | Laravel UI reset form and submission routes/controllers | `routes/web.php`, auth controllers/views |
+| Password reset | Laravel UI reset routes/controllers with Goodgoods-styled request and reset forms | `routes/web.php`, auth controllers/views |
 | React/Vite integration | Vite mounts each React app (`#store-app`, `#auth-app`, `#admin-app`) from minimal Blade hosts | `resources/js/app.js`, `vite.config.js` |
 | Admin access | `is_admin` flag and admin middleware protect admin pages and APIs | `app/Models/User.php`, `app/Http/Middleware/EnsureUserIsAdmin.php`, `bootstrap/app.php` |
 | Admin catalog UI | React/Vite dashboard, vendor CRUD, and product CRUD | `resources/js/components/AdminApp.jsx`, `resources/js/components/admin/` |

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { selectCartLines, selectQuote, clearCart } from '../../../store/cartSlice';
@@ -214,9 +214,9 @@ export default function CheckoutPage() {
                     <p>
                         <strong>Already have an account?</strong> Sign in to apply your saved details and loyalty discounts.
                     </p>
-                    <Link to="/account?redirect=/checkout" className="gg-button gg-button--secondary gg-button--sm">
+                    <a href="/account?redirect=/checkout" className="gg-button gg-button--secondary gg-button--sm">
                         Sign in or register
-                    </Link>
+                    </a>
                 </div>
             )}
 

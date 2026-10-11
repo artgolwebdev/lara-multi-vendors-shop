@@ -68,7 +68,7 @@ export default function CartPage() {
                         <p key={promotion.id}>
                             {promotion.discount_text}
                             {' '}
-                            <Link to="/register">Create an account</Link>
+                            <a href="/register?redirect=%2Fcart">Create an account</a>
                             {' '}to claim it.
                         </p>
                     ))}

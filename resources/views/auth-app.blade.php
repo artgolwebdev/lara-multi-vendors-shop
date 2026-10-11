@@ -9,6 +9,6 @@
         @vite(['resources/js/app.js'])
     </head>
     <body>
-        <div id="auth-app"></div>
+        <div id="auth-app" data-intended-url="{{ $intendedUrl ?? '' }}"></div>
     </body>
 </html>

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class ApiAuthenticationTest extends TestCase
@@ -47,6 +48,24 @@ class ApiAuthenticationTest extends TestCase
             'email' => $user->email,
             'password' => 'a-secure-password',
         ])->assertOk()->assertJsonPath('data.email', $user->email);
+    }
+
+    public function test_login_with_remember_enabled_sets_the_remember_cookie(): void
+    {
+        $user = User::factory()->create([
+            'password' => 'a-secure-password',
+            'remember_token' => null,
+        ]);
+
+        $response = $this->withHeader('Origin', 'http://localhost')
+            ->postJson('/api/login', [
+                'email' => $user->email,
+                'password' => 'a-secure-password',
+                'remember' => true,
+            ]);
+
+        $response->assertOk()->assertCookie(Auth::guard('web')->getRecallerName());
+        $this->assertNotNull($user->fresh()->remember_token);
     }
 
     public function test_registration_validates_required_and_unique_fields(): void

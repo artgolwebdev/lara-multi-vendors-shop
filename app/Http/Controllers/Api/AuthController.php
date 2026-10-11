@@ -25,7 +25,10 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        if (! Auth::guard('web')->attempt($request->validated())) {
+        $credentials = $request->safe()->only(['email', 'password']);
+        $remember = $request->boolean('remember');
+
+        if (! Auth::guard('web')->attempt($credentials, $remember)) {
             return response()->json([
                 'message' => 'The provided credentials are incorrect.',
             ], 422);

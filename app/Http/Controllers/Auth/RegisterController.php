@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -29,6 +30,14 @@ class RegisterController extends Controller
      * @var string
      */
     protected $redirectTo = '/';
+
+    /**
+     * Show the application registration form.
+     */
+    public function showRegistrationForm(): View
+    {
+        return view('auth-app');
+    }
 
     /**
      * Create a new controller instance.

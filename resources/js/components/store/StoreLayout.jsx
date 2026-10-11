@@ -70,7 +70,7 @@ function AccountMenu() {
 
     return (
         <div className="store-header-account">
-            <Link className="store-account-link" to="/account">Account</Link>
+            <a className="store-account-link" href="/account">Account</a>
             {user.is_admin && <a className="store-account-link" href="/admin">Admin</a>}
             <button className="store-account-link store-account-button" type="button" onClick={logout}>Logout</button>
         </div>

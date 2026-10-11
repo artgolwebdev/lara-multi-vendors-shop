@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 class LoginController extends Controller
@@ -25,7 +26,17 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/';
+
+    /**
+     * Show the application's login form.
+     */
+    public function showLoginForm(): View
+    {
+        return view('auth-app', [
+            'intendedUrl' => session()->get('url.intended'),
+        ]);
+    }
 
     /**
      * Create a new controller instance.
