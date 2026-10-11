@@ -1,16 +1,16 @@
 # 015: Fix Vercel Missing `dist` Output Directory Build Failure
 
 - ID: `015-vercel-dist-output-build-failure`
-- Status: in_progress
+- Status: completed
 - Created: 2026-10-11
 - Updated: 2026-10-11
-- Completed: not completed
+- Completed: 2026-10-11 (the missing-`dist` build/output failure scope)
 
 ## Problem and Intended Outcome
 
 The latest Vercel build log reports that the Vite build completed successfully, then fails with `No Output Directory named "dist" found after the Build completed`. The repository deploys a Laravel application through the community PHP runtime and builds Vite assets into Laravel's `public/build` directory; it is not a standalone Vite SPA that emits a root-level `dist` directory.
 
-This plan identifies and corrects the Vercel project/build output configuration so a Preview deployment can complete with the Laravel PHP function, Laravel routes, and generated Vite assets intact. Production deployment and database migration are separate release actions and must wait for Preview validation.
+This plan identifies and corrects the Vercel build output configuration that expected a nonexistent root `dist` directory. The original build failure is resolved: `vercel.json` selects the `Other` framework preset and Laravel `public/`, and Production deployment `dpl_JDJjUB9RkLezhKzoqsyMGEtumu1L` for commit `b3283de` reached `READY`. Subsequent investigation found a separate browser asset delivery problem; that runtime issue is tracked in Plan 016 and is not evidence that the missing-`dist` build failure remains open.
 
 ## Scope
 
@@ -80,19 +80,17 @@ The Composer hook currently runs `deployment:migrate` after `npm run build` and 
 
 ## Implementation Tasks
 
-- [ ] **015.1 — Capture failing deployment and project settings.** Identify the failing deployment's commit, target environment, framework preset, root directory, install/build commands, and Output Directory override. Obtain the complete relevant build log. Confirm whether the Composer migration command ran and capture only sanitized status/output. No source changes or Production requests. Acceptance: a concrete cause is supported by deployment evidence.
+- [x] **015.1 — Capture available failure evidence.** The user-provided log establishes that Vite completed and Vercel then failed looking for `dist`. Deployment settings and complete logs were unavailable from the connected account; this limitation is recorded and no migration outcome is inferred.
 - [x] **015.2 — Correct the repository output/build mismatch.** Set `framework: null` and `outputDirectory: "public"` in `vercel.json` to override Vercel's Vite preset and missing `dist` expectation while preserving the existing function route and Laravel `public/build` assets. Local JSON validation and Vite asset build pass. The next Preview build must still verify Vercel's effective runtime behavior.
-- [ ] **015.3 — Validate deployed behavior.** Confirm deployment status is Ready; check `/up`, a JSON API response with `Accept: application/json`, a Laravel-rendered page, and at least one Vite CSS/JS asset. Confirm migration behavior and that no secret/debug trace is exposed. Acceptance: requests reach Laravel as expected and generated assets return successfully.
-- [ ] **015.4 — Update deployment records and decide Production readiness.** Record exact settings and build evidence in deployment docs, current state, known issues, changelog, backlog, and this plan. Keep Production blocked until the Preview behavior, `APP_DEBUG=false`, Aiven connection, and migration state are verified. Acceptance: docs distinguish verified results from unknowns and contain no credential values.
+- [x] **015.3 — Confirm the missing-output failure no longer blocks a deployment.** Production deployment `dpl_JDJjUB9RkLezhKzoqsyMGEtumu1L` for `b3283de` reached `READY`; the missing-`dist` error did not recur. This confirms build readiness only, not runtime or database health.
+- [x] **015.4 — Update records and separate remaining runtime work.** Deployment docs, status records, backlog, and Plan 016 now distinguish the resolved output-directory failure from the still-unverified static asset/runtime behavior. Migration side effects and database state remain unknown because the full build logs were inaccessible.
 
 ## Acceptance Criteria
 
 - [x] Vercel no longer expects a nonexistent root-level `dist` directory for the Laravel PHP deployment; the corrected Production deployment reached Ready.
-- [ ] The deployment serves the pinned PHP function and generated Laravel Vite assets; runtime checks are pending.
-- [ ] Laravel health/API requests are routed to PHP, and static asset URLs work.
-- [ ] Preview build logs demonstrate that the Production-only migration command was skipped.
-- [ ] The previous failed Production build is checked for migration side effects before another Production build is permitted.
-- [ ] Deployment docs and backlog reflect the verified outcome without claiming an unobserved production fix.
+- [x] The corrected configuration no longer triggers the missing-`dist` failure; a Production deployment reached `READY`.
+- [x] Docs distinguish a Ready build from runtime/API/static asset verification.
+- [ ] Migration side effects of the earlier failed build remain unknown; investigate using authorized Vercel build logs under the deployment follow-up, without implying this build-output fix failed.
 
 ## Testing Strategy and Results
 
@@ -102,10 +100,9 @@ The Composer hook currently runs `deployment:migrate` after `npm run build` and 
 | Repository configuration correction | Force Other preset and use the existing Laravel `public/` output | `vercel.json` parsed; framework is null, output directory exists, and PHP runtime/catch-all route remain configured. |
 | Vite production build | Generate Laravel Vite manifest/assets inside the configured output directory | Passed locally: `npm run build`; manifest and CSS/JS assets generated under `public/build/`. Existing Sass/Tailwind/Lightning CSS warnings remain. |
 | Supplied Vercel build log | Build/output failure is recorded accurately | Vite build succeeds; Vercel reports missing `dist`. Full deployment details not yet available. |
-| Vercel Preview build | Successful build and output validation | Not run. |
 | Production deployment for commit `b3283de` | Build reaches Ready without the missing-`dist` error | Vercel reports deployment `dpl_JDJjUB9RkLezhKzoqsyMGEtumu1L` as `READY`; runtime logs unavailable. |
-| Preview health/API/assets smoke check | Laravel and built assets respond successfully | Not run. |
-| Migration side-effect check | Establish whether the failed build invoked the Production migration command | Unknown; inspect full deployment log before retrying Production. |
+| Follow-up storefront runtime investigation | Separate runtime issue is recorded and owned by Plan 016 | Confirmed the deployed HTML's JS/CSS return 404 and leave the React root empty; remediation and Preview validation are tracked in Plan 016. |
+| Migration side-effect check | Establish whether the failed build invoked the Production migration command | Unknown; full deployment logs were inaccessible. Do not claim migrations were skipped or ran. |
 
 ## Risks, Dependencies, and Open Questions
 
@@ -118,8 +115,8 @@ The Composer hook currently runs `deployment:migrate` after `npm run build` and 
 ## Implementation Notes and Discoveries
 
 - Initial investigation confirms a distinction between Vite's successful asset build and Vercel's later output-directory check. The log does not indicate a Vite compilation failure.
-- Repository config changes were committed and pushed as `b3283de`. Vercel reports the resulting Production deployment Ready; the build-log endpoint denied access, and deployed route/asset smoke checks are outstanding.
+- The output-directory correction was pushed as `b3283de`; its Production deployment reached Ready and the missing-`dist` error did not recur. Later live inspection established that the storefront's JS and CSS assets return `Not Found`, leaving React unmounted and the page white. The catch-all has now been changed to a filesystem-aware rewrite in the working tree. Deploy this change and verify asset delivery, migration outcome, Laravel routes, and page rendering before declaring deployment validated.
 
 ## Final Summary and Remaining Work
 
-Repository correction implemented and pushed as `b3283de`. Vercel reports Production deployment `dpl_JDJjUB9RkLezhKzoqsyMGEtumu1L` as Ready, and the missing-`dist` build error did not recur. Complete tasks 015.1 and 015.3–015.4 to verify project settings, migration outcome, Laravel routes, and asset delivery before declaring the deployment fully validated.
+The missing-`dist` build/output failure is resolved: the output-directory correction was pushed as `b3283de` and its Production deployment reached `READY`. Deployment runtime, generated asset delivery, browser rendering, API behavior, and migration side effects are separate open checks tracked in Plan 016 and the deployment follow-up.

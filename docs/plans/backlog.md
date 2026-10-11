@@ -18,4 +18,5 @@ This index contains only identified work. There is no confirmed feature roadmap 
 | `012-vercel-aiven-production-deployment` | Prepare Laravel production deployment on Vercel with Aiven MySQL | in_progress | [Plan 012](012-vercel-aiven-production-deployment-plan.md) |
 | `013-aiven-mysql-ssl-investigation` | Audit and validate Aiven MySQL TLS configuration for Laravel on Vercel | in_progress | [Plan 013](013-aiven-mysql-ssl-investigation-plan.md) |
 | `014-vercel-deployment-investigation` | Investigate Preview HTML responses and plan a verified Laravel/Vite/Aiven Vercel deployment | in_progress | [Plan 014](014-vercel-deployment-investigation-plan.md) |
-| `015-vercel-dist-output-build-failure` | Diagnose and fix Vercel expecting a missing `dist` output directory for the Laravel PHP deployment | in_progress | [Plan 015](015-vercel-dist-output-build-failure-plan.md) |
+| `015-vercel-dist-output-build-failure` | Diagnose and fix Vercel expecting a missing `dist` output directory for the Laravel PHP deployment | completed | [Plan 015](015-vercel-dist-output-build-failure-plan.md) |
+| `016-blank-production-storefront` | Fix the blank production storefront by verifying Vite asset output, routing, and browser/API behavior | in_progress | [Plan 016](016-fix-blank-production-storefront.md) |

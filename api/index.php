@@ -86,14 +86,47 @@ $staticExtensions = [
     'css', 'js', 'mjs', 'png', 'jpg', 'jpeg', 'webp', 'svg',
     'ico', 'txt', 'woff', 'woff2', 'ttf', 'map',
 ];
+$staticContentTypes = [
+    'css' => 'text/css; charset=UTF-8',
+    'js' => 'text/javascript; charset=UTF-8',
+    'mjs' => 'text/javascript; charset=UTF-8',
+    'png' => 'image/png',
+    'jpg' => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'webp' => 'image/webp',
+    'svg' => 'image/svg+xml',
+    'ico' => 'image/x-icon',
+    'txt' => 'text/plain; charset=UTF-8',
+    'woff' => 'font/woff',
+    'woff2' => 'font/woff2',
+    'ttf' => 'font/ttf',
+    'map' => 'application/json; charset=UTF-8',
+];
+$requestMethod = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 if (
     $staticPath !== false
     && str_starts_with($staticPath, $publicPath.DIRECTORY_SEPARATOR)
     && is_file($staticPath)
     && in_array(strtolower(pathinfo($staticPath, PATHINFO_EXTENSION)), $staticExtensions, true)
+    && in_array($requestMethod, ['GET', 'HEAD'], true)
 ) {
-    return false;
+    $extension = strtolower(pathinfo($staticPath, PATHINFO_EXTENSION));
+    $fileSize = filesize($staticPath);
+
+    header('Content-Type: '.$staticContentTypes[$extension]);
+    header('Cache-Control: public, max-age=3600');
+    header('X-Content-Type-Options: nosniff');
+
+    if ($fileSize !== false) {
+        header('Content-Length: '.$fileSize);
+    }
+
+    if ($requestMethod === 'GET') {
+        readfile($staticPath);
+    }
+
+    exit;
 }
 
 require $publicPath.'/index.php';

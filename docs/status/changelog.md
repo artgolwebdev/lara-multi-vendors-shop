@@ -2,6 +2,9 @@
 
 ## 2026-10-11
 
+- Added Plan 016 to diagnose and fix the blank Production storefront, with separate verification for Vite build output, static asset routing, browser rendering, and catalog API behavior.
+- Added the user's browser evidence that Vite JS/CSS assets return 404. The favicon request also returns 404, but its local file is a zero-byte placeholder and is a separate issue.
+- Implemented a serverless asset response in `api/index.php` after confirming that `vercel-php` does not automatically expose files produced during its Composer build hook to browsers. The local Vite build and PHP-server asset/Laravel-fallback smoke checks pass; Vercel Preview validation remains outstanding because deployment access returns 403.
 - Addressed Vercel's missing `dist` output error by setting the framework preset to `Other` and the output directory to Laravel's `public/` in `vercel.json`; updated Plan 015 and deployment status docs.
 - Pushed commit `b3283de` to `main`; Vercel Production deployment `dpl_JDJjUB9RkLezhKzoqsyMGEtumu1L` reached `READY`, confirming the output-directory build error no longer blocks deployment. Build-log access was denied, so migration output and runtime/API/asset checks remain unverified.
 
