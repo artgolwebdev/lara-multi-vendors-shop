@@ -17,6 +17,7 @@ This file separates verified implementation limits from questions. It does not c
 - The provided Vercel Preview deployment URL is behind Vercel Authentication: unauthenticated `/up` redirects to SSO and `/api/categories` returns Vercel 401. The user-provided app alias reaches PHP 8.5.2/Laravel; `/up` returns the built-in health view for browser requests and JSON when requested. `/api/categories` returns 500 with a database `QueryException`; a response trace was present. Ensure Production `APP_DEBUG=false` immediately and use authorized Vercel logs to diagnose the DB/TLS error. See [Plan 014](../plans/014-vercel-deployment-investigation-plan.md).
 - Email verification files and a user timestamp column exist, but no verification routes appeared in the inspected route list.
 - Vercel Production migration hook is implemented but has not yet run against Aiven. The current workspace targets local MySQL, and the Vercel CLI is not installed. See [Vercel deployment preparation](../development/deployment-vercel.md).
+- The latest supplied Vercel build reached the successful Vite build step but failed because Vercel expected a root `dist/` directory. `vercel.json` now overrides framework detection to `Other` and declares Laravel's `public/` output directory. A new Preview deployment is still required to verify the output correction, PHP routing, and asset delivery; see [Plan 015](../plans/015-vercel-dist-output-build-failure-plan.md).
 
 ## Open Questions
 

@@ -9,6 +9,7 @@ Production is intended to use Aiven MySQL. The project owner reports that Aiven 
 ## Vercel PHP runtime
 
 - `vercel.json` selects `vercel-php@0.9.0` and routes requests to `api/index.php`.
+- `vercel.json` explicitly selects Vercel's `Other` framework preset (`framework: null`) and sets the output directory to Laravel's `public/`. This prevents Vercel from applying the standalone Vite preset's root `dist/` expectation; Vite assets remain under `public/build/` and Laravel requests continue through the PHP function route. If Vercel dashboard settings conflict, the repository config should override them on the next deployment.
 - The PHP entry point initializes Laravel's writable storage and compiled views beneath the function's `/tmp` directory, configures the bundled Aiven CA certificate (with environment-variable overrides), and delegates requests to `public/index.php`.
 - `composer.json` defines a `vercel` build script that runs Laravel package discovery, `npm ci`, `npm run build`, and then `php artisan deployment:migrate`. The command runs pending migrations only when `VERCEL_ENV=production` and `APP_ENV=production`; Preview and local builds skip. It does not run seeders.
 - `package.json` declares Node.js 22.x for the Vercel build.
@@ -61,6 +62,7 @@ The `FILESYSTEM_DISK` for product uploads is **not production-ready**. The app c
 - `QUEUE_CONNECTION=sync` executes the current simulated notification job during the request. Vercel does not supply a persistent `queue:work` process. If real asynchronous work is required, provide a managed queue and an always-on worker outside the function.
 - Send logs to `stderr`; avoid file-based logging and file cache/session drivers.
 - Vite's `public/build` output is ignored by Git, so it must be built by the Composer Vercel build hook. `bootstrap/cache` package-discovery files are build artifacts; do not write there from a request.
+- The supplied deployment log showed Vite finishing successfully and Vercel then failing because it expected a `dist` directory. The repository configuration now explicitly uses Framework Preset `Other` and `public` output to align with Laravel. A new Preview build is still required to confirm the fix; the prior failure's full logs and possible migration-hook side effects were not available for inspection.
 - Local uploads and the `public/storage` symlink are not durable deployment storage.
 
 ## Rollout checklist
