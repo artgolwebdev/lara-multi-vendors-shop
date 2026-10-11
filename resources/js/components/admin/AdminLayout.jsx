@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 const navigation = [
     { href: '/admin', label: 'Overview', key: 'dashboard' },
     { href: '/admin/vendors', label: 'Vendors', key: 'vendors' },
+    { href: '/admin/categories', label: 'Categories', key: 'categories' },
+    { href: '/admin/discount-rules', label: 'Discounts', key: 'discount-rules' },
     { href: '/admin/products', label: 'Products', key: 'products' },
 ];
 

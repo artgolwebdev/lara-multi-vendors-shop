@@ -39,7 +39,7 @@ class ProductController extends Controller
             return $product;
         });
 
-        return (new ProductResource($product->load(['images', 'offers.vendor', 'lowestOffer.vendor'])))
+        return (new ProductResource($product->load(['category', 'images', 'offers.vendor', 'lowestOffer.vendor'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -49,7 +49,7 @@ class ProductController extends Controller
      */
     public function show(Product $product): ProductResource
     {
-        return new ProductResource($product->load(['images', 'offers.vendor', 'lowestOffer.vendor']));
+        return new ProductResource($product->load(['category', 'images', 'offers.vendor', 'lowestOffer.vendor']));
     }
 
     /**
@@ -67,7 +67,7 @@ class ProductController extends Controller
             $this->storeImages($request, $product);
         });
 
-        return new ProductResource($product->refresh()->load(['images', 'offers.vendor', 'lowestOffer.vendor']));
+        return new ProductResource($product->refresh()->load(['category', 'images', 'offers.vendor', 'lowestOffer.vendor']));
     }
 
     /**
@@ -83,7 +83,7 @@ class ProductController extends Controller
     private function productsQuery(): Builder
     {
         return Product::query()
-            ->with(['images', 'offers.vendor', 'lowestOffer.vendor'])
+            ->with(['category', 'images', 'offers.vendor', 'lowestOffer.vendor'])
             ->withCount('vendors')
             ->orderBy('name')
             ->orderBy('id');

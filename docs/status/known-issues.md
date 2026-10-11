@@ -4,9 +4,11 @@ This file separates verified implementation limits from questions. It does not c
 
 ## Verified Limits
 
-- React/API authentication, admin authorization, vendor CRUD, product CRUD, product images, and vendor offers are implemented.
+- React/API authentication, admin authorization, vendor/category/product CRUD, product images, vendor offers, and admin-managed discount rules are implemented.
+- The discount engine calculates quantity and category discounts in integer cents and returns a snapshot-ready line breakdown, but no cart, order, or sub-order persists its output yet; the engine test panel does not write catalog or rule data.
 - Product quantity is shared across offers; per-vendor stock is not represented and must be decided before order/inventory behavior is built.
-- The public storefront, cart, orders/sub-orders, notification jobs, and discount engine remain unimplemented and have no tests yet.
+- The public storefront, cart, orders/sub-orders, and notification jobs remain unimplemented and have no tests yet.
+- Discount stacking applies every matching rule cumulatively per line (capped at the line subtotal) rather than selecting one best rule; this supersedes the plan's originally proposed best-per-line strategy.
 - No deployment target or deployment automation was identified.
 - Email verification files and a user timestamp column exist, but no verification routes appeared in the inspected route list.
 

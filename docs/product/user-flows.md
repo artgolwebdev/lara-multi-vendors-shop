@@ -39,11 +39,15 @@ flowchart TD
     Mount --> React[React admin workspace]
     React --> Dashboard[GET /api/admin/dashboard]
     React --> Vendors[Vendor CRUD API]
+    React --> Categories[Category CRUD API]
     React --> Products[Product CRUD API]
     Products --> Upload[Validated public-disk image uploads]
     Products --> Offers[Transactional vendor offer sync]
+    React --> Discounts[Discount-rule CRUD API]
+    Discounts --> TestPanel[POST /api/admin/discount-rules/test]
+    TestPanel --> Engine[Stateless discount engine breakdown]
 ```
 
-Admin route mounts require an authenticated admin. Guests are redirected to login, and authenticated non-admins receive 403. Registration cannot set admin status. Vendors are managed as records and never sign in.
+Admin route mounts require an authenticated admin. Guests are redirected to login, and authenticated non-admins receive 403. Registration cannot set admin status. Vendors are managed as records and never sign in. Category deletion is rejected while products or discount rules reference the category. The discount test panel resolves the selected product/vendor's active offer and runs the engine without writing any data.
 
 Public product browsing, cart, buyer ordering, and vendor notifications remain unimplemented; see [product requirements](requirements.md).

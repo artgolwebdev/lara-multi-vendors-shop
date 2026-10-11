@@ -14,6 +14,12 @@ Verified with `php artisan route:list --except-vendor` and `php artisan route:li
 | `GET|HEAD` | `/admin/products` | React product list mount (`auth`, admin) |
 | `GET|HEAD` | `/admin/products/create` | React product form mount (`auth`, admin) |
 | `GET|HEAD` | `/admin/products/{product}/edit` | React product edit mount (`auth`, admin) |
+| `GET|HEAD` | `/admin/categories` | React category list mount (`auth`, admin) |
+| `GET|HEAD` | `/admin/categories/create` | React category form mount (`auth`, admin) |
+| `GET|HEAD` | `/admin/categories/{category}/edit` | React category edit mount (`auth`, admin) |
+| `GET|HEAD` | `/admin/discount-rules` | React discount-rule list mount (`auth`, admin) |
+| `GET|HEAD` | `/admin/discount-rules/create` | React discount-rule form mount (`auth`, admin) |
+| `GET|HEAD` | `/admin/discount-rules/{discountRule}/edit` | React discount-rule edit mount (`auth`, admin) |
 | `GET|HEAD` | `/login` | `login`, `Auth\LoginController@showLoginForm` |
 | `POST` | `/login` | `Auth\LoginController@login` |
 | `POST` | `/logout` | `logout`, `Auth\LoginController@logout` |
@@ -26,7 +32,7 @@ Verified with `php artisan route:list --except-vendor` and `php artisan route:li
 | `GET|HEAD` | `/register` | `register`, registration form |
 | `POST` | `/register` | Registration submission |
 
-These are web routes, not a REST API. There are no verified vendor, catalog, order, or payment endpoints. For auth context see [authentication](authentication.md).
+These are web routes, not a REST API. For auth context see [authentication](authentication.md).
 
 ## API Routes
 
@@ -39,8 +45,15 @@ These are web routes, not a REST API. There are no verified vendor, catalog, ord
 | `GET` | `/api/admin/dashboard` | Admin session | `Admin\DashboardController` |
 | `GET|POST` | `/api/admin/vendors` | Admin session | Vendor index/create |
 | `GET|PUT|PATCH|DELETE` | `/api/admin/vendors/{vendor}` | Admin session | Vendor show/update/soft delete |
+| `GET|POST` | `/api/admin/categories` | Admin session | Category index/create |
+| `GET|PUT|PATCH|DELETE` | `/api/admin/categories/{category}` | Admin session | Category show/update/delete (409 while referenced) |
 | `GET|POST` | `/api/admin/products` | Admin session | Product index/create |
 | `GET|PUT|PATCH|DELETE` | `/api/admin/products/{product}` | Admin session | Product edit data/update/soft delete |
 | `DELETE` | `/api/admin/products/{product}/images/{image}` | Admin session | Product image removal |
+| `GET` | `/api/admin/discount-rules/options` | Admin session | Discount-rule form options (types, categories, vendors, products) |
+| `POST` | `/api/admin/discount-rules/test` | Admin session | Runs the discount engine against a product/vendor offer without writing data |
+| `PATCH` | `/api/admin/discount-rules/{discountRule}/status` | Admin session | Set or toggle a rule's active status |
+| `GET|POST` | `/api/admin/discount-rules` | Admin session | Discount-rule index/create |
+| `GET|PUT|PATCH|DELETE` | `/api/admin/discount-rules/{discountRule}` | Admin session | Discount-rule show/update/soft delete |
 
 Admin web routes redirect guests to login and return 403 to non-admin users; admin APIs return 401 to guests and 403 to non-admins. Sanctum also registers `GET /sanctum/csrf-cookie` for CSRF cookie initialization. Public catalog, order, or payment endpoints are not implemented.

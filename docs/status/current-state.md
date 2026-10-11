@@ -15,13 +15,14 @@ Last verified: 2026-10-11.
 
 - A React authentication page at `/`, with registration/login/logout through same-origin Sanctum session API endpoints. Laravel UI web authentication/password-reset routes and authenticated `/home` remain available.
 - `is_admin` defaults false, is excluded from mass assignment, and is rejected by web/API registration. `EnsureUserIsAdmin` protects all admin screens and JSON endpoints.
-- Admin React screens provide dashboard counts, vendor CRUD, and product CRUD with image upload/removal and per-vendor pricing. APIs paginate catalog lists; offers sync in a transaction.
-- Domain models include `User`, `Vendor`, `Product`, `ProductImage`, and `ProductOffer`; the schema includes vendor/product soft deletes, image storage metadata, and indexed product/vendor offers.
-- `DatabaseSeeder` calls a development-only sample seeder for the requested admin account and example vendor/catalog data. It does not seed the admin in production.
+- Admin React screens provide dashboard counts, vendor CRUD, category CRUD, product CRUD with image upload/removal and per-vendor pricing, and discount-rule CRUD with computed status, enable/disable, and an engine test panel. APIs paginate catalog lists; offers sync in a transaction.
+- Domain models include `User`, `Vendor`, `Category`, `Product`, `ProductImage`, `ProductOffer`, and `DiscountRule`. Products reference a required `category_id` (the plan-003 string category was converted); the schema includes vendor/product/rule soft deletes, image storage metadata, and indexed product/vendor offers.
+- `app/Services/Discounts` provides a stateless `DiscountEngine`, tagged `discount.rules` implementations for quantity and category rule types, and immutable integer-cent DTOs. Matching rules stack cumulatively per line and are capped at the line subtotal; money is serialized as decimal strings.
+- `DatabaseSeeder` calls development-only sample seeders for the requested admin account, example vendor/catalog data, and sample discount rules. It does not seed the admin in production.
 - Blade and React/Vite frontend with Bootstrap/Sass and Tailwind/Vite assets. No Inertia, Livewire, or client-side router package is used.
-- PHPUnit: 17 tests and 117 assertions pass, covering admin authorization, vendor/product CRUD, upload validation, offer sync and lowest price, and registration privilege boundaries.
-- The Sanctum migration has been applied to the configured MySQL database in this environment; repository defaults still select SQLite where environment configuration does not override them.
-- Plan 003 migrations passed on disposable SQLite; the configured MySQL database was not changed. Apply pending migrations to the intended database with `php artisan migrate`.
+- PHPUnit: 54 tests and 276 assertions pass, covering admin authorization, vendor/product/category/discount CRUD, upload validation, offer sync and lowest price, discount rule matching/stacking/rounding in unit tests, engine tag resolution, and registration privilege boundaries.
+- The Sanctum and plan-004 migrations (`categories`, product `category_id` conversion, `discount_rules`) have been applied to the configured MySQL database in this environment; the sample discount rules were seeded there. Repository defaults still select SQLite where environment configuration does not override them.
+- `php artisan migrate:fresh --seed` was verified on a disposable in-memory SQLite database; the configured MySQL database was migrated forward without a reset.
 
 ## AI and Project Context
 

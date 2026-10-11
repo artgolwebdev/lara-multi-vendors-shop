@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductOffer;
 use App\Models\User;
@@ -24,9 +25,15 @@ class AdminCatalogSeeder extends Seeder
         $admin->password = 'secret';
         $admin->forceFill(['is_admin' => true])->save();
 
+        $categories = collect(['Home', 'Kitchen', 'Accessories'])
+            ->map(fn (string $name): Category => Category::query()->firstOrCreate(['name' => $name])
+            );
         $vendors = Vendor::factory()->count(4)->create();
 
-        Product::factory()->count(8)->create()->each(function (Product $product, int $index) use ($vendors): void {
+        foreach (range(0, 7) as $index) {
+            $product = Product::factory()->create([
+                'category_id' => $categories[$index % $categories->count()]->id,
+            ]);
             $offerCount = 2 + ($index % 2);
 
             foreach ($vendors->take($offerCount)->values() as $vendorIndex => $vendor) {
@@ -34,6 +41,6 @@ class AdminCatalogSeeder extends Seeder
                     'price' => 12 + ($index * 3) + ($vendorIndex * 2.5),
                 ]);
             }
-        });
+        }
     }
 }

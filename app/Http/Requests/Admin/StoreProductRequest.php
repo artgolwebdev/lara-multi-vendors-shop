@@ -27,7 +27,7 @@ class StoreProductRequest extends FormRequest
             'slug' => ['required', 'string', 'max:255', Rule::unique('products', 'slug')],
             'sku' => ['required', 'string', 'max:100', Rule::unique('products', 'sku')],
             'description' => ['nullable', 'string', 'max:20000'],
-            'category' => ['required', 'string', 'max:100'],
+            'category_id' => ['required', 'integer', Rule::exists('categories', 'id')],
             'quantity' => ['required', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
             'offers' => ['required', 'array', 'min:1'],

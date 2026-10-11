@@ -14,8 +14,9 @@ flowchart LR
     AdminPage --> Vite
     ReactPage --> ApiRoutes[Stateful API routes]
     ApiRoutes --> ApiAuth[Sanctum AuthController]
-    ApiRoutes --> AdminApi[Admin catalog APIs]
-    AdminApi --> Catalog[Vendor, product, image, offer models]
+    ApiRoutes --> AdminApi[Admin catalog and discount APIs]
+    AdminApi --> Catalog[Vendor, category, product, image, offer, discount-rule models]
+    AdminApi --> Discounts[Stateless discount engine]
     Catalog --> DB
     WebRoutes --> Auth[Laravel UI auth controllers]
     WebRoutes --> Home[HomeController]

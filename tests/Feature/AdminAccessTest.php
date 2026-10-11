@@ -14,7 +14,10 @@ class AdminAccessTest extends TestCase
     {
         foreach ([
             '/admin', '/admin/vendors', '/admin/vendors/create', '/admin/vendors/1', '/admin/vendors/1/edit',
+            '/admin/categories', '/admin/categories/create', '/admin/categories/1/edit',
+            '/admin/discount-rules', '/admin/discount-rules/create', '/admin/discount-rules/1/edit',
             '/admin/products', '/admin/products/create', '/admin/products/1/edit',
+            '/admin/categories', '/admin/categories/create', '/admin/categories/1/edit',
         ] as $path) {
             $this->get($path)->assertRedirect('/login');
         }
@@ -26,12 +29,17 @@ class AdminAccessTest extends TestCase
 
         foreach ([
             '/admin', '/admin/vendors', '/admin/vendors/create', '/admin/vendors/1', '/admin/vendors/1/edit',
+            '/admin/categories', '/admin/categories/create', '/admin/categories/1/edit',
+            '/admin/discount-rules', '/admin/discount-rules/create', '/admin/discount-rules/1/edit',
             '/admin/products', '/admin/products/create', '/admin/products/1/edit',
+            '/admin/categories', '/admin/categories/create', '/admin/categories/1/edit',
         ] as $path) {
             $this->actingAs($user)->get($path)->assertForbidden();
         }
 
         $this->actingAs($user)->getJson('/api/admin/vendors')->assertForbidden();
+        $this->actingAs($user)->getJson('/api/admin/categories')->assertForbidden();
+        $this->actingAs($user)->getJson('/api/admin/discount-rules')->assertForbidden();
     }
 
     public function test_admin_can_open_admin_dashboard(): void

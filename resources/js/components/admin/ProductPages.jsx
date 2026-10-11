@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AdminPageHeader, ApiErrors, navigateWithFlash, Pagination, StatusBadge } from './shared';
 
-const emptyProduct = { name: '', slug: '', sku: '', description: '', category: '', quantity: 0, is_active: true };
+const emptyProduct = { name: '', slug: '', sku: '', description: '', category_id: '', quantity: 0, is_active: true };
 const emptyOffer = { vendor_id: '', price: '', vendor_sku: '', is_active: true };
 
 export default function ProductPages({ path }) {
@@ -62,7 +62,7 @@ function ProductList() {
                         {products?.map((product) => (
                             <tr key={product.id}>
                                 <td><span className="admin-row-title">{product.name}</span><span className="admin-table-secondary">SKU {product.sku}</span></td>
-                                <td>{product.category}</td>
+                                <td>{product.category?.name || '—'}</td>
                                 <td>{product.quantity}</td>
                                 <td>{product.lowest_price ? `$${product.lowest_price}` : 'No active offer'}</td>
                                 <td>{product.vendors_count ?? 0}</td>
@@ -84,6 +84,7 @@ function ProductForm({ productId }) {
     const [form, setForm] = useState(emptyProduct);
     const [offers, setOffers] = useState([{ ...emptyOffer }]);
     const [vendors, setVendors] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [images, setImages] = useState([]);
     const [selectedImages, setSelectedImages] = useState([]);
     const [error, setError] = useState(null);
@@ -91,15 +92,19 @@ function ProductForm({ productId }) {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        const requests = [window.axios.get('/api/admin/vendors?per_page=100')];
+        const requests = [
+            window.axios.get('/api/admin/vendors?per_page=100'),
+            window.axios.get('/api/admin/categories'),
+        ];
 
         if (productId) {
             requests.push(window.axios.get(`/api/admin/products/${productId}`));
         }
 
         Promise.all(requests)
-            .then(([vendorResponse, productResponse]) => {
+            .then(([vendorResponse, categoryResponse, productResponse]) => {
                 setVendors(vendorResponse.data.data);
+                setCategories(categoryResponse.data.data);
 
                 if (productResponse) {
                     const product = productResponse.data.data;
@@ -188,7 +193,10 @@ function ProductForm({ productId }) {
                         <label className="admin-field">Name<input name="name" value={form.name} onChange={updateField} required /></label>
                         <label className="admin-field">Slug<input name="slug" value={form.slug} onChange={updateField} required /></label>
                         <label className="admin-field">SKU<input name="sku" value={form.sku} onChange={updateField} required /></label>
-                        <label className="admin-field">Category<input name="category" value={form.category} onChange={updateField} required /></label>
+                        <label className="admin-field">Category<select name="category_id" value={form.category_id} onChange={updateField} required>
+                            <option value="">Choose category</option>
+                            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                        </select></label>
                         <label className="admin-field">Quantity<input name="quantity" type="number" min="0" value={form.quantity} onChange={updateField} required /></label>
                         <label className="admin-field admin-field-wide">Description<textarea name="description" rows="4" value={form.description || ''} onChange={updateField} /></label>
                     </div>

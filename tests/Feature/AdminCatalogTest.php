@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductOffer;
 use App\Models\User;
@@ -72,7 +73,7 @@ class AdminCatalogTest extends TestCase
             'slug' => 'stoneware-bowl',
             'sku' => 'BOWL-001',
             'description' => 'Hand-finished ceramic bowl.',
-            'category' => 'Kitchen',
+            'category_id' => Category::factory()->create(['name' => 'Kitchen'])->id,
             'quantity' => 25,
             'is_active' => '1',
             'offers' => [
@@ -87,6 +88,7 @@ class AdminCatalogTest extends TestCase
 
         $response->assertCreated()
             ->assertJsonPath('data.name', 'Stoneware Bowl')
+            ->assertJsonPath('data.category.name', 'Kitchen')
             ->assertJsonPath('data.lowest_price', '16.25')
             ->assertJsonCount(2, 'data.offers')
             ->assertJsonCount(2, 'data.images');
@@ -117,7 +119,7 @@ class AdminCatalogTest extends TestCase
                 'name' => 'Duplicate Offer Product',
                 'slug' => 'duplicate-offer-product',
                 'sku' => 'DUP-001',
-                'category' => 'Home',
+                'category_id' => Category::factory()->create()->id,
                 'quantity' => 5,
                 'offers' => [
                     ['vendor_id' => $vendor->id, 'price' => 10],
@@ -139,7 +141,7 @@ class AdminCatalogTest extends TestCase
                 'name' => 'Invalid Image Product',
                 'slug' => 'invalid-image-product',
                 'sku' => 'IMAGE-INVALID',
-                'category' => 'Home',
+                'category_id' => Category::factory()->create()->id,
                 'quantity' => 1,
                 'offers' => [['vendor_id' => $vendor->id, 'price' => 5]],
                 'images' => [
@@ -190,7 +192,7 @@ class AdminCatalogTest extends TestCase
             'name' => $product->name,
             'slug' => $product->slug,
             'sku' => $product->sku,
-            'category' => $product->category,
+            'category_id' => $product->category_id,
             'quantity' => $product->quantity,
             'is_active' => true,
             'offers' => [

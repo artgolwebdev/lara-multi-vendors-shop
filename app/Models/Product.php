@@ -6,6 +6,7 @@ use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -23,7 +24,7 @@ class Product extends Model
         'slug',
         'sku',
         'description',
-        'category',
+        'category_id',
         'quantity',
         'is_active',
     ];
@@ -33,6 +34,11 @@ class Product extends Model
         return $this->belongsToMany(Vendor::class)
             ->withPivot(['id', 'price', 'vendor_sku', 'is_active'])
             ->withTimestamps();
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function offers(): HasMany
