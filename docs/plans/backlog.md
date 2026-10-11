@@ -13,3 +13,4 @@ This index contains only identified work. There is no confirmed feature roadmap 
 | `007-orders-checkout` | Orders, checkout, vendor notifications, and order admin management | completed | [Plan 007](007-orders-plan.md) |
 | `008-ux-ui-and-checkout-fixes` | UX/UI polish and checkout/confirmation fixes | completed | [Plan 008](008-ux-ui-and-checkout-fixes-plan.md) |
 | `009-login-register-system-design` | Login and register system design alignment | completed | [Plan 009](009-login-register-system-design-plan.md) |
+| `010-discount-rule-audience-save` | Prevent null audience when saving non-loyalty discount rules; verify loyalty and quantity stacking | completed | [Plan 010](010-discount-rule-audience-save-plan.md) |

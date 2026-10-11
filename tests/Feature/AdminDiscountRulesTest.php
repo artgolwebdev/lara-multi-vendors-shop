@@ -40,6 +40,93 @@ class AdminDiscountRulesTest extends TestCase
         $this->assertSoftDeleted('discount_rules', ['id' => $ruleId]);
     }
 
+    public function test_non_loyalty_rule_create_and_update_normalize_null_audience(): void
+    {
+        $admin = $this->admin();
+
+        $response = $this->actingAs($admin)
+            ->postJson('/api/admin/discount-rules', $this->payload(['audience' => null]));
+
+        $response->assertCreated()
+            ->assertJsonPath('data.audience', DiscountRule::AUDIENCE_ALL_CUSTOMERS);
+
+        $ruleId = $response->json('data.id');
+        $this->assertDatabaseHas('discount_rules', [
+            'id' => $ruleId,
+            'audience' => DiscountRule::AUDIENCE_ALL_CUSTOMERS,
+        ]);
+
+        $this->actingAs($admin)
+            ->patchJson("/api/admin/discount-rules/{$ruleId}", $this->payload([
+                'audience' => null,
+                'priority' => 27,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('data.audience', DiscountRule::AUDIENCE_ALL_CUSTOMERS);
+
+        $this->assertDatabaseHas('discount_rules', [
+            'id' => $ruleId,
+            'audience' => DiscountRule::AUDIENCE_ALL_CUSTOMERS,
+            'priority' => 27,
+        ]);
+    }
+
+    public function test_changing_selected_customer_loyalty_rule_to_quantity_clears_customer_assignments(): void
+    {
+        $admin = $this->admin();
+        $customer = User::factory()->create();
+        $rule = DiscountRule::factory()->create([
+            'type' => DiscountRule::TYPE_LOYALTY,
+            'loyalty_condition' => DiscountRule::LOYALTY_CONDITION_FIRST_ORDER,
+            'audience' => DiscountRule::AUDIENCE_SELECTED_CUSTOMERS,
+            'min_quantity' => null,
+        ]);
+        $rule->customers()->attach($customer);
+
+        $this->actingAs($admin)
+            ->patchJson("/api/admin/discount-rules/{$rule->id}", $this->payload([
+                'type' => DiscountRule::TYPE_QUANTITY,
+                'min_quantity' => 5,
+                'audience' => null,
+            ]))
+            ->assertOk()
+            ->assertJsonPath('data.type', DiscountRule::TYPE_QUANTITY)
+            ->assertJsonPath('data.audience', DiscountRule::AUDIENCE_ALL_CUSTOMERS);
+
+        $this->assertDatabaseHas('discount_rules', [
+            'id' => $rule->id,
+            'audience' => DiscountRule::AUDIENCE_ALL_CUSTOMERS,
+        ]);
+        $this->assertDatabaseMissing('discount_rule_user', [
+            'discount_rule_id' => $rule->id,
+            'user_id' => $customer->id,
+        ]);
+    }
+
+    public function test_selected_customer_loyalty_audience_and_assignment_are_saved(): void
+    {
+        $admin = $this->admin();
+        $customer = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->postJson('/api/admin/discount-rules', $this->payload([
+                'type' => DiscountRule::TYPE_LOYALTY,
+                'min_quantity' => null,
+                'loyalty_condition' => DiscountRule::LOYALTY_CONDITION_FIRST_ORDER,
+                'audience' => DiscountRule::AUDIENCE_SELECTED_CUSTOMERS,
+                'user_ids' => [$customer->id],
+            ]))
+            ->assertCreated()
+            ->assertJsonPath('data.audience', DiscountRule::AUDIENCE_SELECTED_CUSTOMERS);
+
+        $ruleId = DiscountRule::query()->where('name', 'Buy more save more')->value('id');
+
+        $this->assertDatabaseHas('discount_rule_user', [
+            'discount_rule_id' => $ruleId,
+            'user_id' => $customer->id,
+        ]);
+    }
+
     public function test_quantity_rules_require_a_minimum_quantity(): void
     {
         $this->actingAs($this->admin())

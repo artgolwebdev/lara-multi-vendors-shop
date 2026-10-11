@@ -3,11 +3,16 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\DiscountRule;
 use App\Models\Product;
 use App\Models\ProductOffer;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Services\Discounts\Data\CartLine;
+use App\Services\Discounts\Data\DiscountContext;
+use App\Services\Discounts\DiscountEngine;
 use Database\Seeders\AdminCatalogSeeder;
+use Database\Seeders\DiscountRuleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -234,6 +239,30 @@ class AdminCatalogTest extends TestCase
         foreach (Product::query()->withCount('offers')->get() as $product) {
             $this->assertContains($product->offers_count, [2, 3]);
         }
+    }
+
+    public function test_seeded_discount_rules_share_welcome_priority_and_stack_on_first_order(): void
+    {
+        $this->seed(AdminCatalogSeeder::class);
+        $this->seed(DiscountRuleSeeder::class);
+
+        $rules = DiscountRule::query()->get();
+        $this->assertNotEmpty($rules);
+        $this->assertSame([30], $rules->pluck('priority')->unique()->all());
+
+        $product = Product::query()->with('offers')->orderBy('id')->firstOrFail();
+        $offer = $product->offers->firstOrFail();
+        $customer = User::factory()->create(['is_admin' => false]);
+        $result = app(DiscountEngine::class)->calculate(
+            collect([new CartLine($product->id, $offer->vendor_id, 5, (int) round((float) $offer->price * 100), $product->category_id)]),
+            context: new DiscountContext($customer),
+        );
+
+        $appliedRuleNames = collect($result->lines[0]->appliedRules)->map(fn ($rule): string => $rule->ruleName)->all();
+
+        $this->assertContains('Welcome discount', $appliedRuleNames);
+        $this->assertContains('Product quantity break', $appliedRuleNames);
+        $this->assertContains('Storewide quantity break', $appliedRuleNames);
     }
 
     public function test_registration_cannot_set_admin_privilege(): void

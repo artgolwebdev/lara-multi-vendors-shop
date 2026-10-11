@@ -74,6 +74,10 @@ class UpdateDiscountRuleRequest extends FormRequest
             }
         }
 
+        if ($this->input('type') !== DiscountRule::TYPE_LOYALTY) {
+            $normalized['audience'] = DiscountRule::AUDIENCE_ALL_CUSTOMERS;
+        }
+
         if ($this->input('type') === DiscountRule::TYPE_CATEGORY) {
             $normalized['min_quantity'] = null;
             $normalized['product_id'] = null;

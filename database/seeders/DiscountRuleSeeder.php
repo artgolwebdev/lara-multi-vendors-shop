@@ -41,7 +41,7 @@ class DiscountRuleSeeder extends Seeder
                 'starts_at' => null,
                 'ends_at' => null,
                 'is_active' => true,
-                'priority' => 20,
+                'priority' => 30,
             ],
             [
                 'name' => 'Storewide quantity break',
@@ -56,7 +56,7 @@ class DiscountRuleSeeder extends Seeder
                 'starts_at' => null,
                 'ends_at' => null,
                 'is_active' => true,
-                'priority' => 1,
+                'priority' => 30,
             ],
             [
                 'name' => 'Expired category promotion',
@@ -71,7 +71,7 @@ class DiscountRuleSeeder extends Seeder
                 'starts_at' => now()->subMonths(2),
                 'ends_at' => now()->subMonth(),
                 'is_active' => true,
-                'priority' => 5,
+                'priority' => 30,
             ],
             [
                 'name' => 'Disabled fixed discount',
@@ -86,7 +86,7 @@ class DiscountRuleSeeder extends Seeder
                 'starts_at' => null,
                 'ends_at' => null,
                 'is_active' => false,
-                'priority' => 0,
+                'priority' => 30,
             ],
             [
                 'name' => 'Welcome discount',

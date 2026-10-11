@@ -145,6 +145,64 @@ class OrderCheckoutTest extends TestCase
             ->assertJsonPath('data.total', '100.00');
     }
 
+    public function test_first_order_stacks_welcome_loyalty_and_quantity_discounts_for_five_units(): void
+    {
+        $vendor = Vendor::factory()->create(['is_active' => true]);
+        $product = Product::factory()->create(['quantity' => 20]);
+        ProductOffer::factory()->for($product)->for($vendor)->create(['price' => '20.00']);
+        $welcomeRule = DiscountRule::factory()->create([
+            'name' => 'Welcome discount',
+            'type' => DiscountRule::TYPE_LOYALTY,
+            'loyalty_condition' => DiscountRule::LOYALTY_CONDITION_FIRST_ORDER,
+            'audience' => DiscountRule::AUDIENCE_ALL_CUSTOMERS,
+            'discount_type' => DiscountRule::DISCOUNT_TYPE_PERCENTAGE,
+            'value' => '10.00',
+            'priority' => 20,
+            'is_active' => true,
+        ]);
+        $quantityRule = DiscountRule::factory()->quantity(5)->create([
+            'name' => 'Five or more discount',
+            'discount_type' => DiscountRule::DISCOUNT_TYPE_PERCENTAGE,
+            'value' => '10.00',
+            'priority' => 10,
+            'is_active' => true,
+        ]);
+        $customer = User::factory()->create(['is_admin' => false]);
+
+        $payload = [
+            'delivery' => $this->party(),
+            'lines' => [[
+                'product_id' => $product->id,
+                'quantity' => 5,
+                'vendor_id' => $vendor->id,
+            ]],
+        ];
+
+        $firstOrder = $this->actingAs($customer, 'web')->postJson('/api/orders', $payload);
+
+        $firstOrder->assertCreated()
+            ->assertJsonPath('data.subtotal', '100.00')
+            ->assertJsonPath('data.discount_total', '20.00')
+            ->assertJsonPath('data.total', '80.00')
+            ->assertJsonPath('data.sub_orders.0.items.0.discount_amount', '20.00')
+            ->assertJsonPath('data.sub_orders.0.items.0.line_total', '80.00')
+            ->assertJsonCount(2, 'data.sub_orders.0.items.0.applied_rules')
+            ->assertJsonPath('data.sub_orders.0.items.0.applied_rules.0.rule_id', $welcomeRule->id)
+            ->assertJsonPath('data.sub_orders.0.items.0.applied_rules.0.amount', '10.00')
+            ->assertJsonPath('data.sub_orders.0.items.0.applied_rules.1.rule_id', $quantityRule->id)
+            ->assertJsonPath('data.sub_orders.0.items.0.applied_rules.1.amount', '10.00');
+
+        $secondOrder = $this->actingAs($customer, 'web')->postJson('/api/orders', $payload);
+
+        $secondOrder->assertCreated()
+            ->assertJsonPath('data.subtotal', '100.00')
+            ->assertJsonPath('data.discount_total', '10.00')
+            ->assertJsonPath('data.total', '90.00')
+            ->assertJsonCount(1, 'data.sub_orders.0.items.0.applied_rules')
+            ->assertJsonPath('data.sub_orders.0.items.0.applied_rules.0.rule_id', $quantityRule->id)
+            ->assertJsonPath('data.sub_orders.0.items.0.applied_rules.0.amount', '10.00');
+    }
+
     public function test_guest_checkout_creates_order_without_customer_or_loyalty(): void
     {
         $vendor = Vendor::factory()->create(['is_active' => true]);

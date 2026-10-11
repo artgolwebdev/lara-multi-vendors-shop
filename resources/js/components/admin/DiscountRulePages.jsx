@@ -325,7 +325,7 @@ function DiscountRuleForm({ ruleId }) {
             product_id: form.type === 'quantity' ? form.product_id || null : null,
             category_id: form.type === 'category' ? form.category_id || null : null,
             loyalty_condition: form.type === 'loyalty' ? form.loyalty_condition : null,
-            audience: form.type === 'loyalty' ? form.audience : null,
+            audience: form.type === 'loyalty' ? form.audience : 'all_customers',
             user_ids: form.type === 'loyalty' && form.audience === 'selected_customers' ? form.user_ids : [],
             starts_at: form.starts_at || null,
             ends_at: form.ends_at || null,

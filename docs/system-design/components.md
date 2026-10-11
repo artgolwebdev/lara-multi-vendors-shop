@@ -11,6 +11,9 @@
 | Catalog API | Dashboard counts, paginated vendor/product resources, validated writes | `app/Http/Controllers/Api/Admin/`, `app/Http/Requests/Admin/`, `app/Http/Resources/` |
 | Public catalog API | Read-only product listing/detail, category list/detail, and stateless cart quote | `app/Http/Controllers/Api/{ProductController,CategoryController,CartQuoteController}.php`, `app/Http/Requests/CartQuoteRequest.php` |
 | Cart pricing | Offer resolution, per-vendor grouping, and single-call listing prices delegating to the discount engine | `app/Services/Cart/CartQuoter.php`, `app/Services/Cart/Data/` |
+| Order placement | Requote, stock locking, transactional order/sub-order/item snapshots and after-commit job dispatch | `app/Services/Orders/PlaceOrderService.php` |
+| Vendor notification | Queued log-only notification, retry/failure state and optional local queue drain | `app/Jobs/NotifyVendorJob.php`, `app/Services/Orders/QueueAutoProcessor.php` |
+| Customer/admin order APIs | Customer checkout/read access and admin order/sub-order management | `app/Http/Controllers/Api/OrderController.php`, `app/Http/Controllers/Api/Admin/OrderController.php` |
 | Discount API | Rule CRUD, form options, status toggle, and a no-write engine test endpoint | `app/Http/Controllers/Api/Admin/DiscountRuleController.php`, `DiscountTestController.php` |
 | Discount engine | Stateless integer-cent calculator with tagged rule implementations, immutable DTOs, and quantity hints | `app/Services/Discounts/`, `app/Providers/AppServiceProvider.php` |
 | Catalog persistence | Vendor/category/product/image/offer/discount-rule models, relationships, lowest-offer query | `app/Models/Vendor.php`, `Category.php`, `Product.php`, `ProductImage.php`, `ProductOffer.php`, `DiscountRule.php` |
@@ -22,4 +25,4 @@
 | Framework infrastructure | Cache, queue, session, and migration tables | `database/migrations/` |
 | Laravel Boost | Laravel-specific agent skills, guidelines, and MCP integration | `boost.json`, `.mcp.json`, `.claude/skills/`, `.cursor/mcp.json` |
 
-Order, checkout, payment, and notification components remain unimplemented. The storefront cart is client-only (IDs/quantities in `localStorage`) and priced by the stateless quote endpoint. See [architecture overview](../architecture/overview.md) and [features](../product/features.md).
+Order placement, checkout, vendor sub-orders, simulated queued notifications, and order management are implemented. The cart remains browser-side (IDs/quantities in `localStorage`) and is priced by the stateless quote endpoint. Payment is cash on delivery only; no vendor login or online gateway exists. See [architecture overview](../architecture/overview.md) and [features](../product/features.md).

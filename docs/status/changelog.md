@@ -2,6 +2,11 @@
 
 ## 2026-10-11
 
+- Added the assignment audit report and reconciled architecture, database, product, user-flow, system-component, known-issue, and test documentation with the implemented checkout/order workflow. Recorded the latest plan 010 test results as historical verification; the audit did not rerun tests.
+- Updated `DiscountRuleSeeder` so every sample discount rule uses priority 30, the same as “Welcome discount.” Added a regression test asserting the shared priority and confirming welcome loyalty plus matching product/storewide quantity discounts appear together on a seeded first-order cart; the focused catalog feature tests pass (11 tests, 73 assertions).
+- Implemented plan 010: normalized non-loyalty discount rule audiences to `all_customers` in the React admin form and both store/update requests, preserving the non-null database invariant and selected-customer loyalty synchronization.
+- Added feature coverage for null audience create/update, loyalty audience persistence, transitions away from selected-customer loyalty, and checkout stacking: a new customer's five-unit order receives welcome loyalty plus quantity discounts; their subsequent order receives only the quantity discount.
+- Verified the full suite (150 tests, 694 assertions), Pint, and the Vite production build. Build succeeds with existing Sass deprecation and Tailwind/Lightning CSS unknown-at-rule warnings.
 - Implemented plan 009: aligned login, registration, and password recovery with the Goodgoods design system.
   - Mounted the React auth experience at `/login` and `/register` while preserving `/account`; added route-aware modes, shared form primitives, field errors, remember-me, password visibility, and recovery navigation.
   - Preserved Laravel intended destinations and validated explicit auth redirects as same-origin URLs.
