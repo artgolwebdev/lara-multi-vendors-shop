@@ -2,6 +2,7 @@
 
 namespace App\Services\Cart\Data;
 
+use App\Models\DiscountRule;
 use App\Services\Discounts\Data\AppliedRule;
 use App\Services\Discounts\Data\DiscountHint;
 use App\Services\Discounts\Money;
@@ -68,9 +69,21 @@ final readonly class PriceQuoteLine
                 static fn (AppliedRule $rule): array => $rule->toArray(),
                 $this->appliedRules,
             ),
+            'is_loyalty' => $this->hasLoyaltyRule(),
             'line_total' => Money::centsToDecimal($this->lineTotalCents),
             'discount_hint' => $this->discountHint?->toArray(),
             'vendor_options' => $this->vendorOptions,
         ];
+    }
+
+    private function hasLoyaltyRule(): bool
+    {
+        foreach ($this->appliedRules as $rule) {
+            if ($rule->ruleType === DiscountRule::TYPE_LOYALTY) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

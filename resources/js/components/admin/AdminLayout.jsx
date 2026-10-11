@@ -6,6 +6,7 @@ const navigation = [
     { href: '/admin/categories', label: 'Categories', key: 'categories' },
     { href: '/admin/discount-rules', label: 'Discounts', key: 'discount-rules' },
     { href: '/admin/products', label: 'Products', key: 'products' },
+    { href: '/admin/customers', label: 'Customers', key: 'customers' },
 ];
 
 export default function AdminLayout({ user, children }) {

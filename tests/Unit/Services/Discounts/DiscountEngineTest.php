@@ -3,9 +3,13 @@
 namespace Tests\Unit\Services\Discounts;
 
 use App\Models\DiscountRule;
+use App\Models\User;
 use App\Services\Discounts\CategoryDiscountRule;
+use App\Services\Discounts\Contracts\CustomerOrderHistory;
 use App\Services\Discounts\Data\CartLine;
+use App\Services\Discounts\Data\DiscountContext;
 use App\Services\Discounts\DiscountEngine;
+use App\Services\Discounts\LoyaltyCustomerDiscountRule;
 use App\Services\Discounts\QuantityDiscountRule;
 use Tests\TestCase;
 
@@ -85,7 +89,7 @@ class DiscountEngineTest extends TestCase
 
     public function test_it_resolves_tagged_implementations_from_the_container(): void
     {
-        $this->assertCount(2, iterator_to_array(app()->tagged('discount.rules')));
+        $this->assertCount(3, iterator_to_array(app()->tagged('discount.rules')));
 
         $result = app(DiscountEngine::class)->calculate(
             collect([$this->line()]),
@@ -113,6 +117,48 @@ class DiscountEngineTest extends TestCase
         ]);
         $this->assertTrue($active->isActiveAt());
         $this->assertSame(DiscountRule::STATUS_ACTIVE, $active->status());
+    }
+
+    public function test_it_stacks_loyalty_with_category_rules_via_tagged_binding(): void
+    {
+        $customer = new User;
+        $customer->id = 1;
+        $customer->is_admin = false;
+
+        $history = new class implements CustomerOrderHistory
+        {
+            public function completedOrdersCount(User $user): int
+            {
+                return 0;
+            }
+        };
+
+        $engine = new DiscountEngine([
+            new QuantityDiscountRule,
+            new CategoryDiscountRule,
+            new LoyaltyCustomerDiscountRule($history),
+        ]);
+
+        $result = $engine->calculate(
+            collect([$this->line()]),
+            collect([
+                $this->rule(2, [
+                    'type' => DiscountRule::TYPE_CATEGORY,
+                    'category_id' => 7,
+                    'value' => 25,
+                ]),
+                $this->rule(3, [
+                    'type' => DiscountRule::TYPE_LOYALTY,
+                    'loyalty_condition' => DiscountRule::LOYALTY_CONDITION_FIRST_ORDER,
+                    'audience' => DiscountRule::AUDIENCE_ALL_CUSTOMERS,
+                    'value' => 10,
+                ]),
+            ]),
+            new DiscountContext($customer),
+        );
+
+        $this->assertSame(700, $result->discountTotalCents);
+        $this->assertCount(2, $result->lines[0]->appliedRules);
     }
 
     private function engine(): DiscountEngine

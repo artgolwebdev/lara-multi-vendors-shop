@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Link, NavLink, Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { fetchUser, logoutUser, selectUser } from '../../store/authSlice';
 import { selectCartCount } from '../../store/cartSlice';
 import QuoteSync from './QuoteSync';
 
@@ -45,7 +46,44 @@ function SearchBox() {
     );
 }
 
+function AccountMenu() {
+    const dispatch = useDispatch();
+    const user = useSelector(selectUser);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    async function logout() {
+        await dispatch(logoutUser());
+        navigate('/');
+    }
+
+    if (!user) {
+        const redirect = encodeURIComponent(`${location.pathname}${location.search}`);
+
+        return (
+            <div className="store-header-account">
+                <a className="store-account-link" href={`/account?redirect=${redirect}`}>Login</a>
+                <a className="store-account-link" href={`/account?mode=register&redirect=${redirect}`}>Register</a>
+            </div>
+        );
+    }
+
+    return (
+        <div className="store-header-account">
+            <Link className="store-account-link" to="/account">Account</Link>
+            {user.is_admin && <a className="store-account-link" href="/admin">Admin</a>}
+            <button className="store-account-link store-account-button" type="button" onClick={logout}>Logout</button>
+        </div>
+    );
+}
+
 export default function StoreLayout() {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(fetchUser());
+    }, [dispatch]);
+
     return (
         <div className="store-shell">
             <QuoteSync />
@@ -61,7 +99,7 @@ export default function StoreLayout() {
                 <div className="store-header-actions">
                     <SearchBox />
                     <CartIndicator />
-                    <Link className="store-account-link" to="/account">Account</Link>
+                    <AccountMenu />
                 </div>
             </header>
 

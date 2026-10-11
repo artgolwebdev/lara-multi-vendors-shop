@@ -5,6 +5,7 @@ namespace App\Services\Discounts;
 use App\Models\DiscountRule;
 use App\Services\Discounts\Concerns\CalculatesLineDiscount;
 use App\Services\Discounts\Data\CartLine;
+use App\Services\Discounts\Data\DiscountContext;
 use Illuminate\Support\Collection;
 
 /**
@@ -21,7 +22,7 @@ class QuantityDiscountRule implements DiscountRuleInterface
         return $rule->type === DiscountRule::TYPE_QUANTITY;
     }
 
-    public function apply(Collection $cartLines, DiscountRule $rule): array
+    public function apply(Collection $cartLines, DiscountRule $rule, ?DiscountContext $context = null): array
     {
         $minimumQuantity = (int) ($rule->min_quantity ?? 0);
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import AdminDashboard from './admin/AdminDashboard';
 import AdminLayout from './admin/AdminLayout';
 import CategoryPages from './admin/CategoryPages';
+import CustomerPages from './admin/CustomerPages';
 import DiscountRulePages from './admin/DiscountRulePages';
 import ProductPages from './admin/ProductPages';
 import VendorPages from './admin/VendorPages';
@@ -32,6 +33,8 @@ export default function AdminApp() {
         page = <VendorPages path={path} />;
     } else if (path.startsWith('/admin/products')) {
         page = <ProductPages path={path} />;
+    } else if (path.startsWith('/admin/customers')) {
+        page = <CustomerPages path={path} />;
     } else {
         page = <AdminDashboard />;
     }

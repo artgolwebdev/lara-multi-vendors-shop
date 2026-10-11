@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\Admin\CustomerController;
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\DiscountRuleController;
 use App\Http\Controllers\Api\Admin\DiscountTestController;
@@ -25,10 +27,23 @@ Route::post('/cart/quote', CartQuoteController::class)->name('api.cart.quote');
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/account/profile', [AccountController::class, 'profile']);
+    Route::put('/account/profile', [AccountController::class, 'updateProfile']);
+    Route::put('/account/password', [AccountController::class, 'updatePassword']);
+    Route::get('/account/discounts', [AccountController::class, 'discounts']);
+    Route::get('/account/orders', [AccountController::class, 'orders']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->name('api.admin.')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+    Route::get('/customers/{customer}/loyalty-rules', [CustomerController::class, 'loyaltyRules'])->name('customers.loyalty-rules');
+    Route::post('/customers/{customer}/loyalty-rules/{discountRule}', [CustomerController::class, 'attachLoyaltyRule'])->name('customers.loyalty-rules.attach');
+    Route::delete('/customers/{customer}/loyalty-rules/{discountRule}', [CustomerController::class, 'detachLoyaltyRule'])->name('customers.loyalty-rules.detach');
+
     Route::apiResource('categories', CategoryController::class);
     Route::get('/discount-rules/options', [DiscountRuleController::class, 'options'])->name('discount-rules.options');
     Route::post('/discount-rules/test', DiscountTestController::class)->name('discount-rules.test');

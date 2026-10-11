@@ -9,6 +9,7 @@ use App\Http\Resources\DiscountRuleResource;
 use App\Models\Category;
 use App\Models\DiscountRule;
 use App\Models\Product;
+use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class DiscountRuleController extends Controller
     public function index(): AnonymousResourceCollection
     {
         return DiscountRuleResource::collection(DiscountRule::query()
-            ->with(['vendor', 'product', 'category'])
+            ->with(['vendor', 'product', 'category', 'customers'])
             ->orderByDesc('priority')
             ->orderBy('name')
             ->paginate(15));
@@ -33,9 +34,14 @@ class DiscountRuleController extends Controller
      */
     public function store(StoreDiscountRuleRequest $request): JsonResponse
     {
-        $rule = DiscountRule::create($request->validated());
+        $data = $request->validated();
+        $userIds = $data['user_ids'] ?? [];
+        unset($data['user_ids']);
 
-        return (new DiscountRuleResource($rule->load(['vendor', 'product', 'category'])))
+        $rule = DiscountRule::create($data);
+        $this->syncCustomers($rule, $userIds);
+
+        return (new DiscountRuleResource($rule->load(['vendor', 'product', 'category', 'customers'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -48,9 +54,12 @@ class DiscountRuleController extends Controller
         return response()->json(['data' => [
             'types' => DiscountRule::types(),
             'discount_types' => DiscountRule::discountTypes(),
+            'loyalty_conditions' => [DiscountRule::LOYALTY_CONDITION_FIRST_ORDER],
+            'audiences' => [DiscountRule::AUDIENCE_ALL_CUSTOMERS, DiscountRule::AUDIENCE_SELECTED_CUSTOMERS],
             'categories' => Category::query()->orderBy('name')->get(['id', 'name']),
             'vendors' => Vendor::query()->orderBy('name')->get(['id', 'name']),
             'products' => Product::query()->orderBy('name')->get(['id', 'name', 'sku', 'category_id']),
+            'customers' => User::query()->where('is_admin', false)->orderBy('name')->get(['id', 'name', 'email']),
         ]]);
     }
 
@@ -59,7 +68,7 @@ class DiscountRuleController extends Controller
      */
     public function show(DiscountRule $discountRule): DiscountRuleResource
     {
-        return new DiscountRuleResource($discountRule->load(['vendor', 'product', 'category']));
+        return new DiscountRuleResource($discountRule->load(['vendor', 'product', 'category', 'customers']));
     }
 
     /**
@@ -67,9 +76,28 @@ class DiscountRuleController extends Controller
      */
     public function update(UpdateDiscountRuleRequest $request, DiscountRule $discountRule): DiscountRuleResource
     {
-        $discountRule->update($request->validated());
+        $data = $request->validated();
+        $userIds = $data['user_ids'] ?? [];
+        unset($data['user_ids']);
 
-        return new DiscountRuleResource($discountRule->refresh()->load(['vendor', 'product', 'category']));
+        $discountRule->update($data);
+        $this->syncCustomers($discountRule, $userIds);
+
+        return new DiscountRuleResource($discountRule->refresh()->load(['vendor', 'product', 'category', 'customers']));
+    }
+
+    /**
+     * @param  array<int, int|string>  $userIds
+     */
+    private function syncCustomers(DiscountRule $rule, array $userIds): void
+    {
+        if ($rule->type !== DiscountRule::TYPE_LOYALTY || $rule->audience !== DiscountRule::AUDIENCE_SELECTED_CUSTOMERS) {
+            $rule->customers()->sync([]);
+
+            return;
+        }
+
+        $rule->customers()->sync(array_map('intval', $userIds));
     }
 
     /**

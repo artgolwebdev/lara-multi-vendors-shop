@@ -85,3 +85,19 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+/* Customer account dashboard */
+.account-panel { width: min(100%, 520px); padding: 40px 0; }
+.account-head { margin: 18px 0 26px; }
+.account-head h2 { font-size: 38px; margin: 6px 0 0; }
+.account-section { margin-top: 30px; padding-top: 22px; border-top: 1px solid #ecebe3; }
+.account-section h3 { margin: 0 0 14px; font-size: 15px; text-transform: uppercase; letter-spacing: .06em; }
+.account-section form { display: flex; flex-direction: column; gap: 12px; }
+.account-section form .primary-button { align-self: flex-start; margin-top: 4px; }
+.account-section textarea { font: inherit; }
+.account-logout { border: 0; background: none; color: #6b6a62; font: inherit; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; }
+.account-empty { color: #9a9991; font-size: 13px; }
+.account-discounts, .account-orders { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.account-discounts li { display: flex; flex-direction: column; padding: 12px 14px; border: 1px solid #e3ece3; border-radius: 3px; background: #f6faf5; }
+.account-discounts li strong { color: #315b4b; }
+.account-discounts li span { color: #6b6a62; font-size: 13px; }
+.form-success { margin: 0 0 12px; color: #315b4b; font-size: 13px; font-weight: 600; }

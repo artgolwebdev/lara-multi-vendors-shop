@@ -5,11 +5,13 @@ namespace App\Services\Cart;
 use App\Models\DiscountRule;
 use App\Models\Product;
 use App\Models\ProductOffer;
+use App\Models\User;
 use App\Services\Cart\Data\CartLineInput;
 use App\Services\Cart\Data\PriceQuote;
 use App\Services\Cart\Data\PriceQuoteLine;
 use App\Services\Cart\Data\VendorQuoteGroup;
 use App\Services\Discounts\Data\CartLine;
+use App\Services\Discounts\Data\DiscountContext;
 use App\Services\Discounts\DiscountEngine;
 use App\Services\Discounts\DiscountHintResolver;
 use App\Services\Discounts\Money;
@@ -32,7 +34,7 @@ class CartQuoter
     /**
      * @param  Collection<int, CartLineInput>  $lines
      */
-    public function quote(Collection $lines): PriceQuote
+    public function quote(Collection $lines, ?User $customer = null): PriceQuote
     {
         $inputs = $lines->values();
 
@@ -88,6 +90,7 @@ class CartQuoter
                 categoryId: $item['product']->category_id,
             )),
             $rules,
+            new DiscountContext($customer),
         );
 
         $quotedLines = [];

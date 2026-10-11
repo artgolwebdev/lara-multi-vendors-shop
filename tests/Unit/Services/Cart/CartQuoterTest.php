@@ -8,6 +8,7 @@ use App\Models\Vendor;
 use App\Services\Cart\CartQuoter;
 use App\Services\Cart\Data\CartLineInput;
 use App\Services\Discounts\Data\AppliedRule;
+use App\Services\Discounts\Data\DiscountContext;
 use App\Services\Discounts\Data\DiscountLineResult;
 use App\Services\Discounts\Data\DiscountResult;
 use App\Services\Discounts\DiscountEngine;
@@ -211,7 +212,7 @@ class FakeDiscountEngine extends DiscountEngine
         return collect();
     }
 
-    public function calculate(Collection $cartLines, ?Collection $rules = null): DiscountResult
+    public function calculate(Collection $cartLines, ?Collection $rules = null, ?DiscountContext $context = null): DiscountResult
     {
         $lines = [];
 
@@ -247,7 +248,7 @@ class FlatDiscountEngine extends DiscountEngine
         return collect();
     }
 
-    public function calculate(Collection $cartLines, ?Collection $rules = null): DiscountResult
+    public function calculate(Collection $cartLines, ?Collection $rules = null, ?DiscountContext $context = null): DiscountResult
     {
         $lines = [];
         $subtotal = 0;

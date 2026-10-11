@@ -11,6 +11,9 @@ const emptyRule = {
     vendor_id: '',
     product_id: '',
     category_id: '',
+    loyalty_condition: 'first_order',
+    audience: 'all_customers',
+    user_ids: [],
     starts_at: '',
     ends_at: '',
     priority: 0,
@@ -30,6 +33,10 @@ function formatValue(rule) {
 }
 
 function appliesTo(rule) {
+    if (rule.type === 'loyalty') {
+        return rule.audience === 'selected_customers' ? 'Selected customers' : 'All customers';
+    }
+
     if (rule.category_name) {
         return `Category: ${rule.category_name}`;
     }
@@ -135,7 +142,7 @@ function DiscountRuleList() {
                         {rules?.map((rule) => (
                             <tr key={rule.id}>
                                 <td><span className="admin-row-title">{rule.name}</span><span className="admin-table-secondary">{rule.description || '—'}</span></td>
-                                <td>{rule.type}{rule.type === 'quantity' ? ` (min ${rule.min_quantity})` : ''}</td>
+                                 <td>{rule.type}{rule.type === 'quantity' ? ` (min ${rule.min_quantity})` : ''}{rule.type === 'loyalty' ? ` (${rule.loyalty_condition})` : ''}</td>
                                 <td>{formatValue(rule)}</td>
                                 <td>{appliesTo(rule)}</td>
                                 <td><RuleStatus status={rule.status} /></td>
@@ -276,6 +283,9 @@ function DiscountRuleForm({ ruleId }) {
                         vendor_id: rule.vendor_id ? String(rule.vendor_id) : '',
                         product_id: rule.product_id ? String(rule.product_id) : '',
                         category_id: rule.category_id ? String(rule.category_id) : '',
+                        loyalty_condition: rule.loyalty_condition || 'first_order',
+                        audience: rule.audience || 'all_customers',
+                        user_ids: (rule.customer_ids || []).map(String),
                         starts_at: toDateTimeLocal(rule.starts_at),
                         ends_at: toDateTimeLocal(rule.ends_at),
                     });
@@ -288,6 +298,14 @@ function DiscountRuleForm({ ruleId }) {
     function updateField(event) {
         const { name, value, checked, type } = event.target;
         setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }));
+        setError(null);
+    }
+
+    function updateCustomers(event) {
+        const selected = Array.from(event.target.options)
+            .filter((option) => option.selected)
+            .map((option) => option.value);
+        setForm((current) => ({ ...current, user_ids: selected }));
         setError(null);
     }
 
@@ -306,6 +324,9 @@ function DiscountRuleForm({ ruleId }) {
             vendor_id: form.vendor_id || null,
             product_id: form.type === 'quantity' ? form.product_id || null : null,
             category_id: form.type === 'category' ? form.category_id || null : null,
+            loyalty_condition: form.type === 'loyalty' ? form.loyalty_condition : null,
+            audience: form.type === 'loyalty' ? form.audience : null,
+            user_ids: form.type === 'loyalty' && form.audience === 'selected_customers' ? form.user_ids : [],
             starts_at: form.starts_at || null,
             ends_at: form.ends_at || null,
             priority: form.priority || 0,
@@ -328,14 +349,25 @@ function DiscountRuleForm({ ruleId }) {
     }
 
     function summary() {
+        const amount = form.discount_type === 'percentage' ? `${form.value || 0}%` : `${money(form.value)}`;
+
+        if (form.type === 'loyalty') {
+            const audience = form.audience === 'selected_customers'
+                ? `${form.user_ids.length} selected customer(s)`
+                : 'all registered customers';
+            const condition = form.loyalty_condition === 'first_order' ? 'the first order' : form.loyalty_condition;
+
+            return `${amount} off ${condition} for ${audience}.`;
+        }
+
         const target = form.type === 'category'
             ? options?.categories.find((category) => String(category.id) === String(form.category_id))?.name
             : options?.products.find((product) => String(product.id) === String(form.product_id))?.name;
-        const amount = form.discount_type === 'percentage' ? `${form.value || 0}%` : `${money(form.value)} per unit`;
+        const perUnit = form.discount_type === 'fixed' ? ' per unit' : '';
         const qualifier = form.type === 'quantity' ? ` when buying ${form.min_quantity || 0}+ units` : '';
         const scope = target ? ` on ${target}` : ' across all products';
 
-        return `${amount} off${qualifier}${scope}.`;
+        return `${amount} off${perUnit}${qualifier}${scope}.`;
     }
 
     if (loading) {
@@ -371,6 +403,21 @@ function DiscountRuleForm({ ruleId }) {
                             <label className="admin-field">Category<select name="category_id" value={form.category_id} onChange={updateField} required>
                                 <option value="">Choose category</option>
                                 {options?.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                            </select></label>
+                        )}
+                        {form.type === 'loyalty' && (
+                            <label className="admin-field">Condition<select name="loyalty_condition" value={form.loyalty_condition} onChange={updateField} required>
+                                {(options?.loyalty_conditions || ['first_order']).map((condition) => <option key={condition} value={condition}>{condition}</option>)}
+                            </select></label>
+                        )}
+                        {form.type === 'loyalty' && (
+                            <label className="admin-field">Audience<select name="audience" value={form.audience} onChange={updateField} required>
+                                {(options?.audiences || ['all_customers', 'selected_customers']).map((audience) => <option key={audience} value={audience}>{audience}</option>)}
+                            </select></label>
+                        )}
+                        {form.type === 'loyalty' && form.audience === 'selected_customers' && (
+                            <label className="admin-field admin-field-wide">Selected customers<select multiple size="5" value={form.user_ids} onChange={updateCustomers}>
+                                {options?.customers?.map((customer) => <option key={customer.id} value={customer.id}>{customer.name} ({customer.email})</option>)}
                             </select></label>
                         )}
                         <label className="admin-field">Vendor (optional)<select name="vendor_id" value={form.vendor_id} onChange={updateField}>

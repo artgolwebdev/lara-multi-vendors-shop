@@ -899,3 +899,47 @@
         transform: none;
     }
 }
+
+/* Customer account header */
+.store-header-account {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.store-account-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #25251f;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+/* Loyalty / welcome discount */
+.store-rule-badge-loyalty {
+    color: #7a4a12;
+    background: #f6e6cf;
+}
+
+/* Guest promotion banner */
+.store-promo-banner {
+    margin-bottom: 22px;
+    padding: 14px 18px;
+    border: 1px solid #e3c48f;
+    border-radius: 3px;
+    background: #fbf3e3;
+    color: #5c4318;
+    font-size: 13px;
+}
+
+.store-promo-banner p { margin: 0; }
+
+.store-promo-banner a {
+    color: #8a5a12;
+    font-weight: 700;
+}

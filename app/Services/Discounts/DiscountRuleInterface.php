@@ -4,6 +4,7 @@ namespace App\Services\Discounts;
 
 use App\Models\DiscountRule;
 use App\Services\Discounts\Data\CartLine;
+use App\Services\Discounts\Data\DiscountContext;
 use Illuminate\Support\Collection;
 
 /**
@@ -18,5 +19,5 @@ interface DiscountRuleInterface
      * @param  Collection<int, CartLine>  $cartLines
      * @return array<int, int> Cart line index to discount amount in cents.
      */
-    public function apply(Collection $cartLines, DiscountRule $rule): array;
+    public function apply(Collection $cartLines, DiscountRule $rule, ?DiscountContext $context = null): array;
 }

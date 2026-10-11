@@ -88,6 +88,23 @@ class DiscountRuleSeeder extends Seeder
                 'is_active' => false,
                 'priority' => 0,
             ],
+            [
+                'name' => 'Welcome discount',
+                'description' => '10% off your first order for all registered customers.',
+                'type' => DiscountRule::TYPE_LOYALTY,
+                'loyalty_condition' => DiscountRule::LOYALTY_CONDITION_FIRST_ORDER,
+                'audience' => DiscountRule::AUDIENCE_ALL_CUSTOMERS,
+                'discount_type' => DiscountRule::DISCOUNT_TYPE_PERCENTAGE,
+                'value' => 10,
+                'min_quantity' => null,
+                'product_id' => null,
+                'vendor_id' => null,
+                'category_id' => null,
+                'starts_at' => null,
+                'ends_at' => null,
+                'is_active' => true,
+                'priority' => 30,
+            ],
         ];
 
         foreach ($rules as $rule) {

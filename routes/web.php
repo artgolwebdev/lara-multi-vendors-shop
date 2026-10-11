@@ -33,7 +33,7 @@ Route::get('/account', function () {
 
 Auth::routes();
 
-//Route::get('/home', [HomeController::class, 'index'])->name('home');
+// Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function (): void {
     Route::view('/', 'admin-app')->name('dashboard');
@@ -50,4 +50,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::view('/products', 'admin-app')->name('products.index');
     Route::view('/products/create', 'admin-app')->name('products.create');
     Route::view('/products/{product}/edit', 'admin-app')->name('products.edit');
+    Route::view('/customers', 'admin-app')->name('customers.index');
+    Route::view('/customers/{customer}', 'admin-app')->name('customers.show');
 });

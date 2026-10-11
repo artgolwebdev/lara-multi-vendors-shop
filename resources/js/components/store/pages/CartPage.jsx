@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { selectUser } from '../../../store/authSlice';
 import {
     selectCartLines,
     selectFieldErrors,
@@ -18,6 +19,8 @@ export default function CartPage() {
     const status = useSelector(selectQuoteStatus);
     const error = useSelector(selectQuoteError);
     const fieldErrors = useSelector(selectFieldErrors);
+    const user = useSelector(selectUser);
+    const promotions = user ? [] : (quote?.promotions ?? []);
 
     if (lines.length === 0) {
         return (
@@ -47,6 +50,19 @@ export default function CartPage() {
                     message={error?.message ?? 'We could not price your cart.'}
                     onRetry={() => window.location.reload()}
                 />
+            )}
+
+            {promotions.length > 0 && (
+                <div className="store-promo-banner" role="status">
+                    {promotions.map((promotion) => (
+                        <p key={promotion.id}>
+                            {promotion.discount_text}
+                            {' '}
+                            <Link to="/register">Create an account</Link>
+                            {' '}to claim it.
+                        </p>
+                    ))}
+                </div>
             )}
 
             <div className="store-cart-layout">

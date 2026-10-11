@@ -41,6 +41,7 @@ final readonly class DiscountLineResult
                 static fn (AppliedRule $rule): array => $rule->toArray(),
                 $this->appliedRules,
             ),
+            'applied_rule_ids' => array_map(static fn (AppliedRule $rule) => $rule->ruleId, $this->appliedRules),
             'line_total' => Money::centsToDecimal($this->lineTotalCents),
         ];
     }

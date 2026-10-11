@@ -43,6 +43,20 @@ class UpdateDiscountRuleRequest extends FormRequest
                 Rule::exists('categories', 'id'),
                 Rule::requiredIf($this->input('type') === DiscountRule::TYPE_CATEGORY),
             ],
+            'loyalty_condition' => [
+                'nullable',
+                'string',
+                Rule::in([DiscountRule::LOYALTY_CONDITION_FIRST_ORDER]),
+                Rule::requiredIf($this->input('type') === DiscountRule::TYPE_LOYALTY),
+            ],
+            'audience' => [
+                'nullable',
+                'string',
+                Rule::in([DiscountRule::AUDIENCE_ALL_CUSTOMERS, DiscountRule::AUDIENCE_SELECTED_CUSTOMERS]),
+                Rule::requiredIf($this->input('type') === DiscountRule::TYPE_LOYALTY),
+            ],
+            'user_ids' => ['nullable', 'array'],
+            'user_ids.*' => ['integer', Rule::exists('users', 'id')->where('is_admin', false)],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => $this->endsAtRules(),
             'is_active' => ['sometimes', 'boolean'],
@@ -67,6 +81,15 @@ class UpdateDiscountRuleRequest extends FormRequest
 
         if ($this->input('type') === DiscountRule::TYPE_QUANTITY) {
             $normalized['category_id'] = null;
+        }
+
+        if ($this->input('type') === DiscountRule::TYPE_LOYALTY) {
+            $normalized['min_quantity'] = null;
+            $normalized['product_id'] = null;
+        }
+
+        if ($this->input('type') !== DiscountRule::TYPE_LOYALTY || $this->input('audience') === DiscountRule::AUDIENCE_ALL_CUSTOMERS) {
+            $normalized['user_ids'] = [];
         }
 
         $this->merge($normalized);

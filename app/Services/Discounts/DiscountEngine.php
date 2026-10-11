@@ -5,6 +5,7 @@ namespace App\Services\Discounts;
 use App\Models\DiscountRule;
 use App\Services\Discounts\Data\AppliedRule;
 use App\Services\Discounts\Data\CartLine;
+use App\Services\Discounts\Data\DiscountContext;
 use App\Services\Discounts\Data\DiscountLineResult;
 use App\Services\Discounts\Data\DiscountResult;
 use Illuminate\Support\Collection;
@@ -35,7 +36,7 @@ class DiscountEngine
      * @param  Collection<int, CartLine>  $cartLines
      * @param  Collection<int, DiscountRule>|null  $rules
      */
-    public function calculate(Collection $cartLines, ?Collection $rules = null): DiscountResult
+    public function calculate(Collection $cartLines, ?Collection $rules = null, ?DiscountContext $context = null): DiscountResult
     {
         $lines = $cartLines->values();
         $rules ??= $this->activeRules();
@@ -52,7 +53,7 @@ class DiscountEngine
                 continue;
             }
 
-            foreach ($implementation->apply($lines, $rule) as $index => $amount) {
+            foreach ($implementation->apply($lines, $rule, $context) as $index => $amount) {
                 $remaining = $lines[$index]->subtotalCents() - $discounts[$index];
                 $appliedAmount = max(0, min($amount, $remaining));
 
@@ -61,7 +62,7 @@ class DiscountEngine
                 }
 
                 $discounts[$index] += $appliedAmount;
-                $appliedRules[$index][] = new AppliedRule($rule->id, $rule->name, $appliedAmount);
+                $appliedRules[$index][] = new AppliedRule($rule->id, $rule->name, $appliedAmount, $rule->type);
             }
         }
 

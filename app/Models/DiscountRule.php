@@ -20,6 +20,14 @@ class DiscountRule extends Model
 
     public const TYPE_CATEGORY = 'category';
 
+    public const TYPE_LOYALTY = 'loyalty';
+
+    public const LOYALTY_CONDITION_FIRST_ORDER = 'first_order';
+
+    public const AUDIENCE_ALL_CUSTOMERS = 'all_customers';
+
+    public const AUDIENCE_SELECTED_CUSTOMERS = 'selected_customers';
+
     public const DISCOUNT_TYPE_PERCENTAGE = 'percentage';
 
     public const DISCOUNT_TYPE_FIXED = 'fixed';
@@ -36,6 +44,8 @@ class DiscountRule extends Model
         'name',
         'description',
         'type',
+        'loyalty_condition',
+        'audience',
         'discount_type',
         'value',
         'min_quantity',
@@ -53,7 +63,7 @@ class DiscountRule extends Model
      */
     public static function types(): array
     {
-        return [self::TYPE_QUANTITY, self::TYPE_CATEGORY];
+        return [self::TYPE_QUANTITY, self::TYPE_CATEGORY, self::TYPE_LOYALTY];
     }
 
     /**
@@ -126,6 +136,13 @@ class DiscountRule extends Model
             'ends_at' => 'datetime',
             'is_active' => 'boolean',
             'priority' => 'integer',
+            'loyalty_condition' => 'string',
+            'audience' => 'string',
         ];
+    }
+
+    public function customers()
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 }

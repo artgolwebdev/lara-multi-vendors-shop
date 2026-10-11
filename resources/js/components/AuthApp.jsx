@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
+import AccountPanel from './account/AccountPanel';
 
-const emptyForm = { name: '', email: '', password: '', password_confirmation: '' };
+const emptyForm = { name: '', email: '', password: '', password_confirmation: '', phone: '', address: '' };
+
+function initialMode() {
+    const params = new URLSearchParams(window.location.search);
+
+    return params.get('mode') === 'register' ? 'register' : 'login';
+}
 
 export default function AuthApp() {
     const [user, setUser] = useState(null);
-    const [mode, setMode] = useState('login');
+    const [mode, setMode] = useState(initialMode);
     const [form, setForm] = useState(emptyForm);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -35,8 +42,13 @@ export default function AuthApp() {
                 : { email: form.email, password: form.password };
             const { data } = await window.axios.post(endpoint, payload);
 
-            setUser(data.data);
             setForm(emptyForm);
+
+            if (redirectAfterAuth()) {
+                return;
+            }
+
+            setUser(data.data);
         } catch (requestError) {
             const errors = requestError.response?.data?.errors;
             setError(errors ? Object.values(errors).flat()[0] : requestError.response?.data?.message || 'Something went wrong. Please try again.');
@@ -58,6 +70,18 @@ export default function AuthApp() {
         } finally {
             setSubmitting(false);
         }
+    }
+
+    function redirectAfterAuth() {
+        const redirect = new URLSearchParams(window.location.search).get('redirect');
+
+        if (redirect && redirect.startsWith('/')) {
+            window.location.assign(redirect);
+
+            return true;
+        }
+
+        return false;
     }
 
     return (
@@ -85,17 +109,7 @@ export default function AuthApp() {
                 {loading ? (
                     <div className="auth-status" role="status">Checking your account<span className="loading-dots">...</span></div>
                 ) : user ? (
-                    <div className="auth-form-wrap">
-                        <p className="eyebrow">You're signed in</p>
-                        <h2>Welcome back,<br />{user.name}.</h2>
-                        <p className="form-intro">Your marketplace is ready when you are.</p>
-                        {error && <p className="form-error" role="alert">{error}</p>}
-                        {user.is_admin && <a className="admin-entry-link" href="/admin">Admin dashboard <span aria-hidden="true">&#8599;</span></a>}
-                        <button className="primary-button" type="button" onClick={logout} disabled={submitting}>
-                            {submitting ? 'Signing out...' : 'Sign out'}
-                            <span aria-hidden="true">↗</span>
-                        </button>
-                    </div>
+                    <AccountPanel user={user} onUserChange={setUser} onLogout={logout} />
                 ) : (
                     <div className="auth-form-wrap">
                         <p className="eyebrow">{mode === 'register' ? 'Join the marketplace' : 'Good to see you again'}</p>
@@ -126,6 +140,18 @@ export default function AuthApp() {
                                 <label className="field-label">
                                     Confirm password
                                     <input name="password_confirmation" type="password" autoComplete="new-password" value={form.password_confirmation} onChange={updateField} required />
+                                </label>
+                            )}
+                            {mode === 'register' && (
+                                <label className="field-label">
+                                    Phone (optional)
+                                    <input name="phone" autoComplete="tel" value={form.phone} onChange={updateField} />
+                                </label>
+                            )}
+                            {mode === 'register' && (
+                                <label className="field-label">
+                                    Address (optional)
+                                    <textarea name="address" rows="2" autoComplete="street-address" value={form.address} onChange={updateField} />
                                 </label>
                             )}
                             {error && <p className="form-error" role="alert">{error}</p>}

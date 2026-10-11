@@ -38,7 +38,10 @@ export default function CartLine({ line, index, error }) {
                     </p>
                 )}
 
-                {line.applied_rule && <p className="store-rule-badge">{line.applied_rule.name}</p>}
+                {line.is_loyalty && line.applied_rule && (
+                    <p className="store-rule-badge store-rule-badge-loyalty">Welcome discount — {line.applied_rule.name}</p>
+                )}
+                {!line.is_loyalty && line.applied_rule && <p className="store-rule-badge">{line.applied_rule.name}</p>}
                 {line.discount_hint && <p className="store-hint">{line.discount_hint.label}</p>}
 
                 {error && <p className="store-line-error" role="alert">{error}</p>}

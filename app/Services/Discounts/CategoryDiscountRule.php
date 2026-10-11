@@ -4,6 +4,7 @@ namespace App\Services\Discounts;
 
 use App\Models\DiscountRule;
 use App\Services\Discounts\Concerns\CalculatesLineDiscount;
+use App\Services\Discounts\Data\DiscountContext;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,7 +20,7 @@ class CategoryDiscountRule implements DiscountRuleInterface
         return $rule->type === DiscountRule::TYPE_CATEGORY;
     }
 
-    public function apply(Collection $cartLines, DiscountRule $rule): array
+    public function apply(Collection $cartLines, DiscountRule $rule, ?DiscountContext $context = null): array
     {
         if ($rule->category_id === null) {
             return [];
