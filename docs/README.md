@@ -15,7 +15,7 @@ This directory is the durable project context for humans and coding agents. It d
 - [Architecture](architecture/overview.md): current backend, frontend, database, and security.
 - [System design](system-design/components.md): components, request/data flow, and integrations.
 - [API and routes](api/README.md): current HTTP surface, including the distinction between web routes and APIs.
-- [Development](development/setup.md): setup, conventions, testing, and deployment evidence.
+- [Development](development/setup.md): setup, conventions, and testing. [Vercel deployment preparation](development/deployment-vercel.md) describes the current Aiven/Vercel rollout plan and its limits.
 - [Decisions](decisions/README.md): ADR process and template; no historical ADRs are asserted.
 - [Plans](plans/README.md): task lifecycle, templates, and backlog.
 - [Status](status/current-state.md): verified project snapshot and [changelog](status/changelog.md).

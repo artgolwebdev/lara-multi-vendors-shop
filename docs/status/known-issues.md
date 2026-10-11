@@ -12,7 +12,8 @@ This file separates verified implementation limits from questions. It does not c
 - Checkout vendor selection defaults to `customer_choice`; `lowest_price` is configurable. For assignments requiring automatic cheapest-offer selection, use or default to the lowest-price policy.
 - Notifications are queued and simulated by logging. Local auto-processing can drain jobs after the response; non-local environments need an operational queue worker.
 - Discount stacking applies every matching rule cumulatively per line (capped at the line subtotal).
-- No production deployment target or CI/CD deployment automation was identified.
+- No production deployment has been completed and no CI/CD deployment automation is configured.
+- Initial Vercel runtime scaffolding now exists, but deployment and Aiven MySQL connectivity are unverified. Product image uploads still use local storage and are not durable on Vercel; persistent object storage must be selected before production image uploads are enabled. See [Vercel deployment preparation](../development/deployment-vercel.md) and [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md).
 - Email verification files and a user timestamp column exist, but no verification routes appeared in the inspected route list.
 
 ## Open Questions

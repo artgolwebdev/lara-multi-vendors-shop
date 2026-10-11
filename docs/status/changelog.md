@@ -2,6 +2,9 @@
 
 ## 2026-10-11
 
+- Started Plan 012 with Vercel's community PHP runtime, a Laravel serverless entry point using `/tmp` for writable runtime paths, Vite build integration, MySQL TLS verification configuration, and deployment documentation. The owner reports Aiven MySQL credentials are in Vercel. Deployment, Aiven connectivity, migration procedure, and durable product-image storage remain unverified; local disk is temporary on Vercel.
+- Configured Plan 012's Vercel entry point to use the owner-provided `storage/certs/ca.pem` as the default Aiven CA path, while retaining environment overrides and failing closed when no CA file is available.
+- Verified that PHP OpenSSL parses the provided Aiven CA PEM; this format check does not establish CA trust or live connectivity.
 - Started plan 011: made the storefront header sticky and added a compact mobile disclosure for primary navigation, search, cart count, and account actions. At the available ~506px browser width, the header stayed visible while scrolling; the menu exposed its state, closed on Escape, and the account page stacked. Production build and focused storefront tests passed (5 tests, 41 assertions). Exact plan viewport widths and authenticated admin UI review remain outstanding.
 - Added the assignment audit report and reconciled architecture, database, product, user-flow, system-component, known-issue, and test documentation with the implemented checkout/order workflow. Recorded the latest plan 010 test results as historical verification; the audit did not rerun tests.
 - Updated `DiscountRuleSeeder` so every sample discount rule uses priority 30, the same as “Welcome discount.” Added a regression test asserting the shared priority and confirming welcome loyalty plus matching product/storewide quantity discounts appear together on a seeded first-order cart; the focused catalog feature tests pass (11 tests, 73 assertions).

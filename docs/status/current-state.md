@@ -38,4 +38,11 @@ Last verified: 2026-10-11.
 - Root `AGENTS.md` contains Boost-managed guidance inside markers plus the project-owned task workflow outside them. `CLAUDE.md` points to that workflow.
 - There is no project-level `.ai/rules/` directory or index. No Boost rules were added.
 
+## Deployment Preparation
+
+- Initial Vercel community PHP runtime configuration and a Laravel serverless entry point are present under Plan 012. This configuration has not been deployed or verified against Vercel or the user's Aiven service.
+- Production database target is Aiven MySQL; the project owner reports adding its environment variables to Vercel and identified `storage/certs/ca.pem` as the Aiven CA bundle. The Vercel entry point now uses this bundle by default; local PHP OpenSSL can parse it, but environment names, certificate trust/rotation, service region, live connectivity, migration state, and production data state remain unverified.
+- Product images still use the local public disk. They are not durable on Vercel; do not rely on admin image uploads in production until persistent object storage is selected and configured.
+- See [Vercel deployment preparation](../development/deployment-vercel.md) and [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md).
+
 See [known issues and unknowns](known-issues.md), [changelog](changelog.md), [the initial plan](../plans/001-project-foundation.md), and [Step 1 authentication plan](../plans/002-react-api-auth.md).
