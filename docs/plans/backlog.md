@@ -20,3 +20,4 @@ This index contains only identified work. There is no confirmed feature roadmap 
 | `014-vercel-deployment-investigation` | Investigate Preview HTML responses and plan a verified Laravel/Vite/Aiven Vercel deployment | in_progress | [Plan 014](014-vercel-deployment-investigation-plan.md) |
 | `015-vercel-dist-output-build-failure` | Diagnose and fix Vercel expecting a missing `dist` output directory for the Laravel PHP deployment | completed | [Plan 015](015-vercel-dist-output-build-failure-plan.md) |
 | `016-blank-production-storefront` | Fix the blank production storefront by verifying Vite asset output, routing, and browser/API behavior | in_progress | [Plan 016](016-fix-blank-production-storefront.md) |
+| `017-fix-production-api-404s` | Diagnose and fix Production 404s from Laravel API requests on Vercel | in_progress | [Plan 017](017-fix-production-api-404s-plan.md) |

@@ -129,4 +129,16 @@ if (
     exit;
 }
 
+$laravelFrontController = $publicPath.'/index.php';
+$laravelServerVariables = [
+    'DOCUMENT_ROOT' => $publicPath,
+    'SCRIPT_FILENAME' => $laravelFrontController,
+    'SCRIPT_NAME' => '/index.php',
+    'PHP_SELF' => '/index.php',
+];
+
+foreach ($laravelServerVariables as $name => $value) {
+    $_SERVER[$name] = $value;
+}
+
 require $publicPath.'/index.php';
