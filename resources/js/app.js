@@ -1,4 +1,4 @@
-/**
+﻿/**
  * First we will load all of this project's JavaScript dependencies which
  * includes React and other helpers. It's a great starting point while
  * building robust, powerful web applications using React + Laravel.
@@ -12,6 +12,8 @@ import './bootstrap';
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+import '../css/tokens.css';
+import '../css/ui.css';
 import '../css/auth.css';
 import '../css/admin.css';
 import '../css/store.css';
@@ -38,3 +40,4 @@ const adminRootElement = document.getElementById('admin-app');
 if (adminRootElement) {
 	createRoot(adminRootElement).render(createElement(AdminApp));
 }
+

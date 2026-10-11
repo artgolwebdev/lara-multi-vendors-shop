@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AdminPageHeader, ApiErrors } from './shared';
 
 const countLabels = [
+    ['orders', 'Orders', 'All placed orders'],
     ['vendors', 'Vendors', 'Total vendor records'],
     ['active_vendors', 'Active vendors', 'Available to receive offers'],
     ['products', 'Products', 'Shared catalog items'],

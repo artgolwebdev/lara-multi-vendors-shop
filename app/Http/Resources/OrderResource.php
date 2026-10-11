@@ -37,6 +37,7 @@ class OrderResource extends JsonResource
             'user_id' => $this->user_id,
             'user' => new UserResource($this->whenLoaded('user')),
             'sub_orders_count' => $this->whenCounted('subOrders'),
+            'items_count' => $this->whenCounted('items'),
             'sub_orders' => SubOrderResource::collection($this->whenLoaded('subOrders')),
             'guest_token' => $this->when($request->routeIs('api.orders.store'), $this->guest_token),
             'created_at' => $this->created_at?->toIso8601String(),

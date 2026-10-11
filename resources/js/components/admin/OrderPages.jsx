@@ -1,16 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { AdminPageHeader, ApiErrors } from './shared';
 import { formatMoney } from '../store/formatMoney';
+import Card from '../ui/Card';
+import Badge from '../ui/Badge';
+import Skeleton from '../ui/Skeleton';
 
-const STATUS_COLORS = {
-    pending: 'status-pending',
-    confirmed: 'status-confirmed',
-    shipped: 'status-shipped',
-    delivered: 'status-delivered',
-    cancelled: 'status-cancelled',
-};
+const STATUS_OPTIONS = [
+    { value: '', label: 'All statuses' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'confirmed', label: 'Confirmed' },
+    { value: 'shipped', label: 'Shipped' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'cancelled', label: 'Cancelled' },
+];
 
 export default function OrderPages({ path }) {
-    const isIndex = path === '/admin/orders';
     const orderIdMatch = path.match(/\/admin\/orders\/(\d+)/);
     const orderId = orderIdMatch ? orderIdMatch[1] : null;
 
@@ -26,131 +30,304 @@ function OrderList() {
     const [meta, setMeta] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [filters, setFilters] = useState({ search: '', status: '', vendor_id: '', customer_id: '', date_from: '', date_to: '', page: 1 });
     const [vendors, setVendors] = useState([]);
     const [customers, setCustomers] = useState([]);
 
+    // Initialize filter form from URL params
+    const getInitialFilters = () => {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            search: params.get('search') || '',
+            status: params.get('status') || '',
+            vendor_id: params.get('vendor_id') || '',
+            customer_id: params.get('customer_id') || '',
+            date_from: params.get('date_from') || '',
+            date_to: params.get('date_to') || '',
+            page: Number(params.get('page')) || 1,
+        };
+    };
+
+    const [formFilters, setFormFilters] = useState(getInitialFilters);
+    const [appliedFilters, setAppliedFilters] = useState(getInitialFilters);
+
     useEffect(() => {
-        window.axios.get('/api/admin/vendors?per_page=100').then(({ data }) => setVendors(data.data || []));
-        window.axios.get('/api/admin/customers?per_page=100').then(({ data }) => setCustomers(data.data || []));
+        window.axios.get('/api/admin/vendors?per_page=100')
+            .then(({ data }) => setVendors(data.data || []))
+            .catch(() => {});
+
+        window.axios.get('/api/admin/customers?per_page=100')
+            .then(({ data }) => setCustomers(data.data || []))
+            .catch(() => {});
     }, []);
 
     useEffect(() => {
         setLoading(true);
+        setError('');
+
         const params = new URLSearchParams();
-        Object.entries(filters).forEach(([key, value]) => {
+        Object.entries(appliedFilters).forEach(([key, value]) => {
             if (value) params.set(key, value);
         });
+
+        // Persist to browser URL without reload
+        const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+        window.history.replaceState({}, '', newUrl);
+
         window.axios.get(`/api/admin/orders?${params.toString()}`)
             .then(({ data }) => {
                 setOrders(data.data || []);
                 setMeta(data.meta || null);
             })
-            .catch(() => setError('Failed to load orders'))
+            .catch(() => setError('Failed to load orders. Please try again.'))
             .finally(() => setLoading(false));
-    }, [filters]);
+    }, [appliedFilters]);
 
-    function handleFilterChange(event) {
+    const handleFormChange = (event) => {
         const { name, value } = event.target;
-        setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
-    }
+        setFormFilters((prev) => ({ ...prev, [name]: value }));
+    };
 
-    function handlePageChange(page) {
-        setFilters((prev) => ({ ...prev, page }));
-    }
+    const handleApplyFilters = (e) => {
+        if (e) e.preventDefault();
+        setAppliedFilters({ ...formFilters, page: 1 });
+    };
+
+    const handleResetFilters = () => {
+        const empty = { search: '', status: '', vendor_id: '', customer_id: '', date_from: '', date_to: '', page: 1 };
+        setFormFilters(empty);
+        setAppliedFilters(empty);
+    };
+
+    const removeFilter = (key) => {
+        const updated = { ...appliedFilters, [key]: '', page: 1 };
+        setFormFilters((prev) => ({ ...prev, [key]: '' }));
+        setAppliedFilters(updated);
+    };
+
+    const handlePageChange = (page) => {
+        setFormFilters((prev) => ({ ...prev, page }));
+        setAppliedFilters((prev) => ({ ...prev, page }));
+    };
+
+    const activeChips = useMemo(() => {
+        const chips = [];
+        if (appliedFilters.search) {
+            chips.push({ key: 'search', label: `Search: "${appliedFilters.search}"` });
+        }
+        if (appliedFilters.status) {
+            chips.push({ key: 'status', label: `Status: ${appliedFilters.status}` });
+        }
+        if (appliedFilters.vendor_id) {
+            const v = vendors.find((x) => String(x.id) === String(appliedFilters.vendor_id));
+            chips.push({ key: 'vendor_id', label: `Vendor: ${v ? v.name : appliedFilters.vendor_id}` });
+        }
+        if (appliedFilters.customer_id) {
+            const c = customers.find((x) => String(x.id) === String(appliedFilters.customer_id));
+            chips.push({ key: 'customer_id', label: `Customer: ${c ? c.name : appliedFilters.customer_id}` });
+        }
+        if (appliedFilters.date_from) {
+            chips.push({ key: 'date_from', label: `From: ${appliedFilters.date_from}` });
+        }
+        if (appliedFilters.date_to) {
+            chips.push({ key: 'date_to', label: `To: ${appliedFilters.date_to}` });
+        }
+        return chips;
+    }, [appliedFilters, vendors, customers]);
 
     return (
         <div className="admin-section">
-            <header className="admin-section-head">
-                <div>
-                    <h1>Orders</h1>
-                    <p className="admin-subtitle">All orders grouped by vendors with status tracking</p>
-                </div>
-            </header>
+            <AdminPageHeader
+                eyebrow="Order management"
+                title="Orders"
+            />
 
             {error && <div className="admin-alert admin-alert-danger">{error}</div>}
 
-            <div className="admin-card">
-                <div className="admin-filters">
-                    <input
-                        type="search"
-                        name="search"
-                        placeholder="Search order #, customer name or email"
-                        value={filters.search}
-                        onChange={handleFilterChange}
-                    />
-                    <select name="status" value={filters.status} onChange={handleFilterChange}>
-                        <option value="">All statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                    <select name="vendor_id" value={filters.vendor_id} onChange={handleFilterChange}>
-                        <option value="">All vendors</option>
-                        {vendors.map((vendor) => (
-                            <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
-                        ))}
-                    </select>
-                    <select name="customer_id" value={filters.customer_id} onChange={handleFilterChange}>
-                        <option value="">All customers</option>
-                        {customers.map((customer) => (
-                            <option key={customer.id} value={customer.id}>{customer.name} - {customer.email}</option>
-                        ))}
-                    </select>
-                    <input type="date" name="date_from" value={filters.date_from} onChange={handleFilterChange} />
-                    <input type="date" name="date_to" value={filters.date_to} onChange={handleFilterChange} />
-                </div>
+            <Card className="admin-card" style={{ marginBottom: '24px' }}>
+                <form onSubmit={handleApplyFilters} className="admin-filters-form">
+                    <div className="admin-filters" style={{ borderBottom: 'none', marginBottom: '12px', paddingBottom: 0 }}>
+                        <input
+                            type="search"
+                            name="search"
+                            placeholder="Search order #, customer name or email"
+                            value={formFilters.search}
+                            onChange={handleFormChange}
+                        />
 
-                <div className="admin-table-wrapper">
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Order #</th>
-                                <th>Customer</th>
-                                <th>Vendors</th>
-                                <th>Items</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Placed</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {loading ? (
-                                <tr><td colSpan="8">Loading...</td></tr>
-                            ) : orders.length === 0 ? (
-                                <tr><td colSpan="8">No orders found</td></tr>
-                            ) : (
-                                orders.map((order) => (
-                                    <tr key={order.id}>
-                                        <td><strong>{order.order_number}</strong></td>
-                                        <td>
-                                            <div>{order.customer?.name || order.customer_name}</div>
-                                            <div className="admin-subtext">{order.customer?.email || order.customer_email}</div>
-                                        </td>
-                                        <td>{order.sub_orders?.length ?? order.sub_orders_count ?? 0}</td>
-                                        <td>{order.items_count ?? '-'}</td>
-                                        <td><strong>{formatMoney(order.total)}</strong></td>
-                                        <td><span className={`admin-status ${STATUS_COLORS[order.status]}`}>{order.status}</span></td>
-                                        <td>{order.placed_at ? new Date(order.placed_at).toLocaleString() : '-'}</td>
-                                        <td><a className="admin-link" href={`/admin/orders/${order.id}`}>View</a></td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                        <select name="status" value={formFilters.status} onChange={handleFormChange}>
+                            {STATUS_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                        </select>
 
-                {meta && meta.last_page > 1 && (
-                    <div className="admin-pagination">
-                        <button type="button" disabled={filters.page <= 1} onClick={() => handlePageChange(filters.page - 1)}>Previous</button>
-                        <span>Page {meta.current_page} of {meta.last_page}</span>
-                        <button type="button" disabled={filters.page >= meta.last_page} onClick={() => handlePageChange(filters.page + 1)}>Next</button>
+                        <select name="vendor_id" value={formFilters.vendor_id} onChange={handleFormChange}>
+                            <option value="">All vendors</option>
+                            {vendors.map((vendor) => (
+                                <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
+                            ))}
+                        </select>
+
+                        <select name="customer_id" value={formFilters.customer_id} onChange={handleFormChange}>
+                            <option value="">All customers</option>
+                            {customers.map((customer) => (
+                                <option key={customer.id} value={customer.id}>{customer.name} ({customer.email})</option>
+                            ))}
+                        </select>
+
+                        <input
+                            type="date"
+                            name="date_from"
+                            value={formFilters.date_from}
+                            onChange={handleFormChange}
+                            title="From date"
+                        />
+                        <input
+                            type="date"
+                            name="date_to"
+                            value={formFilters.date_to}
+                            onChange={handleFormChange}
+                            title="To date"
+                        />
+
+                        <button type="submit" className="gg-button gg-button--primary gg-button--sm">
+                            Apply
+                        </button>
+                        <button type="button" onClick={handleResetFilters} className="gg-button gg-button--secondary gg-button--sm">
+                            Reset
+                        </button>
                     </div>
-                )}
+
+                    {activeChips.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', paddingTop: '10px', borderTop: '1px solid var(--c-border, #e4e2da)' }}>
+                            <span style={{ fontSize: '12px', color: 'var(--c-muted)', alignSelf: 'center' }}>Active filters:</span>
+                            {activeChips.map((chip) => (
+                                <button
+                                    key={chip.key}
+                                    type="button"
+                                    onClick={() => removeFilter(chip.key)}
+                                    className="gg-badge"
+                                    style={{ cursor: 'pointer', background: '#eaf1ec', borderColor: '#b8d5c3', color: 'var(--c-primary)' }}
+                                    title="Click to remove filter"
+                                >
+                                    {chip.label} ✕
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </form>
+            </Card>
+
+            <div className="admin-table-wrapper">
+                <table className="admin-table gg-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Vendors</th>
+                            <th>Items</th>
+                            <th style={{ textAlign: 'right' }}>Total</th>
+                            <th>Status</th>
+                            <th>Placed At</th>
+                            <th style={{ textAlign: 'right' }}>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading ? (
+                            <tr>
+                                <td colSpan="8" style={{ padding: '24px' }}>
+                                    <Skeleton style={{ height: 24, marginBottom: 8 }} />
+                                    <Skeleton style={{ height: 24, marginBottom: 8 }} />
+                                    <Skeleton style={{ height: 24 }} />
+                                </td>
+                            </tr>
+                        ) : orders.length === 0 ? (
+                            <tr>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '36px', color: 'var(--c-muted)' }}>
+                                    No orders found matching the selected filters.
+                                </td>
+                            </tr>
+                        ) : (
+                            orders.map((order) => {
+                                const subOrders = order.sub_orders || [];
+                                return (
+                                    <tr key={order.id}>
+                                        <td>
+                                            <a href={`/admin/orders/${order.id}`} className="admin-link" style={{ fontWeight: 700 }}>
+                                                {order.order_number}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <div style={{ fontWeight: 600 }}>{order.customer?.name || 'Guest'}</div>
+                                            <div className="admin-subtext">{order.customer?.email}</div>
+                                        </td>
+                                        <td>
+                                            {subOrders.length > 0 ? (
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                    {subOrders.map((so) => (
+                                                        <a
+                                                            key={so.id}
+                                                            href={`/admin/vendors/${so.vendor?.id}`}
+                                                            className="gg-badge"
+                                                            style={{ textDecoration: 'none', fontSize: '11px' }}
+                                                        >
+                                                            {so.vendor?.name}
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span>{order.sub_orders_count ?? 0}</span>
+                                            )}
+                                        </td>
+                                        <td>{order.items_count ?? '—'}</td>
+                                        <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
+                                            {formatMoney(order.total)}
+                                        </td>
+                                        <td>
+                                            <span className={`store-status-pill status-${order.status}`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td style={{ fontSize: '12px', color: 'var(--c-muted)' }}>
+                                            {order.placed_at ? new Date(order.placed_at).toLocaleDateString() : '—'}
+                                        </td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <a className="gg-button gg-button--secondary gg-button--sm" href={`/admin/orders/${order.id}`}>
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
+                    </tbody>
+                </table>
             </div>
+
+            {meta && meta.last_page > 1 && (
+                <div className="admin-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--c-muted)' }}>
+                        Page {meta.current_page} of {meta.last_page} ({meta.total} total orders)
+                    </span>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                            type="button"
+                            className="gg-button gg-button--secondary gg-button--sm"
+                            disabled={appliedFilters.page <= 1}
+                            onClick={() => handlePageChange(appliedFilters.page - 1)}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="gg-button gg-button--secondary gg-button--sm"
+                            disabled={appliedFilters.page >= meta.last_page}
+                            onClick={() => handlePageChange(appliedFilters.page + 1)}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -165,7 +342,7 @@ function OrderDetail({ orderId }) {
     const fetchOrder = () => {
         window.axios.get(`/api/admin/orders/${orderId}`)
             .then(({ data }) => setOrder(data.data))
-            .catch(() => setError('Failed to load order'))
+            .catch(() => setError('Failed to load order details.'))
             .finally(() => setLoading(false));
     };
 
@@ -176,12 +353,13 @@ function OrderDetail({ orderId }) {
     async function updateStatus(subOrderId, status) {
         setUpdating(true);
         setMessage('');
+        setError('');
         try {
             await window.axios.patch(`/api/admin/sub-orders/${subOrderId}/status`, { status });
-            setMessage('Status updated');
+            setMessage('Sub-order status updated successfully.');
             fetchOrder();
         } catch {
-            setError('Failed to update status');
+            setError('Failed to update sub-order status.');
         } finally {
             setUpdating(false);
         }
@@ -190,126 +368,250 @@ function OrderDetail({ orderId }) {
     async function notifyVendor(subOrderId) {
         setUpdating(true);
         setMessage('');
+        setError('');
         try {
             await window.axios.post(`/api/admin/sub-orders/${subOrderId}/notify`);
-            setMessage('Notification queued');
+            setMessage('Vendor notification queued.');
             fetchOrder();
         } catch {
-            setError('Failed to notify vendor');
+            setError('Failed to dispatch vendor notification.');
         } finally {
             setUpdating(false);
         }
     }
 
-    if (loading) return <div className="admin-section">Loading...</div>;
-    if (error && !order) return <div className="admin-alert admin-alert-danger">{error}</div>;
+    if (loading) {
+        return (
+            <div className="admin-section">
+                <Skeleton style={{ height: 36, width: 200, marginBottom: 16 }} />
+                <Skeleton style={{ height: 180, marginBottom: 16 }} />
+            </div>
+        );
+    }
+
+    if (error && !order) {
+        return (
+            <div className="admin-section">
+                <div className="admin-alert admin-alert-danger">{error}</div>
+                <a href="/admin/orders" className="admin-link">← Back to orders</a>
+            </div>
+        );
+    }
+
     if (!order) return null;
 
     return (
         <div className="admin-section">
-            <header className="admin-section-head">
+            <header className="admin-section-head gg-page-header">
                 <div>
-                    <a href="/admin/orders" className="admin-link">← Back to orders</a>
+                    <a href="/admin/orders" className="admin-link" style={{ fontSize: '13px', display: 'inline-block', marginBottom: '8px' }}>
+                        ← Back to orders
+                    </a>
                     <h1>Order {order.order_number}</h1>
-                    <p className="admin-subtitle">Placed {order.placed_at ? new Date(order.placed_at).toLocaleString() : '-'}</p>
+                    <p className="admin-subtitle">
+                        Placed {order.placed_at ? new Date(order.placed_at).toLocaleString() : '—'}
+                    </p>
                 </div>
-                <span className={`admin-status ${STATUS_COLORS[order.status]}`}>{order.status}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span className={`store-status-pill status-${order.status}`} style={{ fontSize: '13px', padding: '4px 12px' }}>
+                        {order.status}
+                    </span>
+                </div>
             </header>
 
             {message && <div className="admin-alert admin-alert-success">{message}</div>}
             {error && <div className="admin-alert admin-alert-danger">{error}</div>}
 
-            <div className="admin-grid">
-                <div className="admin-card">
-                    <h2>Overview</h2>
+            <div className="admin-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '24px' }}>
+                <div className="admin-card" style={{ margin: 0 }}>
+                    <h2>Totals Overview</h2>
                     <dl className="admin-definition">
-                        <div><dt>Payment</dt><dd>Cash on delivery</dd></div>
-                        <div><dt>Subtotal</dt><dd>{formatMoney(order.subtotal)}</dd></div>
-                        <div><dt>Discounts</dt><dd className="admin-discount">−{formatMoney(order.discount_total)}</dd></div>
-                        <div><dt>Total</dt><dd><strong>{formatMoney(order.total)}</strong></dd></div>
+                        <div>
+                            <dt>Payment method</dt>
+                            <dd>Cash on delivery</dd>
+                        </div>
+                        <div>
+                            <dt>Subtotal</dt>
+                            <dd>{formatMoney(order.subtotal)}</dd>
+                        </div>
+                        <div>
+                            <dt>Discounts</dt>
+                            <dd className="admin-discount">−{formatMoney(order.discount_total)}</dd>
+                        </div>
+                        <div style={{ borderTop: '1px solid var(--c-border, #e4e2da)', paddingTop: '8px', marginTop: '4px' }}>
+                            <dt>Grand Total</dt>
+                            <dd><strong style={{ fontSize: '16px' }}>{formatMoney(order.total)}</strong></dd>
+                        </div>
                     </dl>
                 </div>
-                <div className="admin-card">
+
+                <div className="admin-card" style={{ margin: 0 }}>
                     <h2>Customer</h2>
                     <div className="admin-stack">
-                        <div><strong>{order.customer?.name || order.customer_name}</strong></div>
-                        <div>{order.customer?.email || order.customer_email}</div>
+                        <div><strong>{order.customer?.name}</strong></div>
+                        <div><a href={`mailto:${order.customer?.email}`} className="admin-link">{order.customer?.email}</a></div>
                         {order.customer?.phone && <div>{order.customer.phone}</div>}
-                        {order.customer?.address && <div>{order.customer.address}</div>}
+                        {order.customer?.address && <div style={{ color: 'var(--c-muted)' }}>{order.customer.address}</div>}
+                        {order.user_id && (
+                            <div style={{ marginTop: '8px' }}>
+                                <a href={`/admin/customers/${order.user_id}`} className="gg-button gg-button--secondary gg-button--sm">
+                                    View Customer Profile
+                                </a>
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div className="admin-card">
-                    <h2>Delivery</h2>
+
+                <div className="admin-card" style={{ margin: 0 }}>
+                    <h2>Delivery Details</h2>
                     <div className="admin-stack">
-                        <div><strong>{order.delivery?.name || order.delivery_name}</strong></div>
-                        <div>{order.delivery?.email || order.delivery_email}</div>
+                        <div><strong>{order.delivery?.name}</strong></div>
+                        <div><a href={`mailto:${order.delivery?.email}`} className="admin-link">{order.delivery?.email}</a></div>
                         {order.delivery?.phone && <div>{order.delivery.phone}</div>}
-                        <div>{order.delivery?.address || order.delivery_address}</div>
+                        <div style={{ color: 'var(--c-muted)' }}>{order.delivery?.address}</div>
+                        {order.notes && (
+                            <div style={{ marginTop: '8px', padding: '8px', background: '#f8faf7', borderRadius: '3px', fontSize: '12px' }}>
+                                <strong>Notes:</strong> {order.notes}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
             <div className="admin-card">
-                <h2>Sub-orders & Vendors</h2>
-                {order.sub_orders?.map((subOrder) => (
-                    <div key={subOrder.id} className="admin-suborder">
-                        <div className="admin-suborder-head">
-                            <div>
-                                <h3>{subOrder.vendor.name}</h3>
-                                <p className="admin-subtext">{subOrder.vendor.email} {subOrder.vendor.phone && `• ${subOrder.vendor.phone}`}</p>
+                <h2>Sub-orders & Items by Vendor</h2>
+                {order.sub_orders?.map((subOrder) => {
+                    const canResendNotification = subOrder.notification_status === 'pending' || subOrder.notification_status === 'failed';
+
+                    return (
+                        <div key={subOrder.id} className="admin-suborder" style={{ borderBottom: '1px solid var(--c-border, #e4e2da)', paddingBottom: '24px', marginBottom: '24px' }}>
+                            <div className="admin-suborder-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+                                <div>
+                                    <h3 style={{ margin: '0 0 4px', fontSize: '16px' }}>
+                                        <a href={`/admin/vendors/${subOrder.vendor?.id}`} className="admin-link">
+                                            {subOrder.vendor?.name}
+                                        </a>
+                                    </h3>
+                                    <p className="admin-subtext" style={{ margin: 0 }}>
+                                        {subOrder.vendor?.email} {subOrder.vendor?.phone && `• ${subOrder.vendor?.phone}`}
+                                    </p>
+                                </div>
+
+                                <div className="admin-suborder-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                    <label style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        Status:
+                                        <select
+                                            value={subOrder.status}
+                                            onChange={(e) => updateStatus(subOrder.id, e.target.value)}
+                                            disabled={updating}
+                                            style={{ height: '34px', padding: '0 8px', borderRadius: '3px', border: '1px solid #ccd5ce' }}
+                                        >
+                                            <option value="pending">Pending</option>
+                                            <option value="confirmed">Confirmed</option>
+                                            <option value="shipped">Shipped</option>
+                                            <option value="delivered">Delivered</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                    </label>
+
+                                    <span className={`store-status-pill status-${subOrder.status}`}>
+                                        {subOrder.status}
+                                    </span>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span className={`gg-badge status-${subOrder.notification_status === 'sent' ? 'delivered' : subOrder.notification_status === 'failed' ? 'cancelled' : 'pending'}`}>
+                                            Notify: {subOrder.notification_status}
+                                        </span>
+                                        {subOrder.notified_at && (
+                                            <span style={{ fontSize: '11px', color: 'var(--c-muted)' }}>
+                                                {new Date(subOrder.notified_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        )}
+
+                                        {canResendNotification && (
+                                            <button
+                                                type="button"
+                                                className="gg-button gg-button--secondary gg-button--sm"
+                                                onClick={() => notifyVendor(subOrder.id)}
+                                                disabled={updating}
+                                            >
+                                                Send notification
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="admin-suborder-actions">
-                                <select value={subOrder.status} onChange={(e) => updateStatus(subOrder.id, e.target.value)} disabled={updating}>
-                                    <option value="pending">Pending</option>
-                                    <option value="confirmed">Confirmed</option>
-                                    <option value="shipped">Shipped</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="cancelled">Cancelled</option>
-                                </select>
-                                <button type="button" className="admin-button" onClick={() => notifyVendor(subOrder.id)} disabled={updating}>
-                                    {subOrder.notification_status === 'sent' ? 'Re-notify' : 'Notify vendor'}
-                                </button>
-                                <span className={`admin-status ${STATUS_COLORS[subOrder.status]}`}>{subOrder.status}</span>
-                            </div>
-                        </div>
-                        <div className="admin-table-wrapper">
-                            <table className="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th>Qty</th>
-                                        <th>Unit</th>
-                                        <th>Discount</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {subOrder.items?.map((item) => (
-                                        <tr key={item.id}>
-                                            <td>
-                                                <div>{item.product_name}</div>
-                                                {item.product_category && <div className="admin-subtext">{item.product_category}</div>}
-                                            </td>
-                                            <td>{item.product_sku || '-'}</td>
-                                            <td>{item.quantity}</td>
-                                            <td>{formatMoney(item.unit_price)}</td>
-                                            <td>{item.discount_amount > 0 ? `−${formatMoney(item.discount_amount)}` : formatMoney(0)}</td>
-                                            <td><strong>{formatMoney(item.line_total)}</strong></td>
+
+                            <div className="admin-table-wrapper" style={{ marginBottom: '14px' }}>
+                                <table className="admin-table gg-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>SKU</th>
+                                            <th>Qty</th>
+                                            <th>Unit price</th>
+                                            <th>Discount</th>
+                                            <th style={{ textAlign: 'right' }}>Total</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {subOrder.items?.map((item) => {
+                                            const appliedRule = item.applied_rule?.name || (item.applied_rules?.[0]?.name);
+
+                                            return (
+                                                <tr key={item.id}>
+                                                    <td>
+                                                        <div style={{ fontWeight: 600 }}>{item.product_name}</div>
+                                                        {item.product_category && (
+                                                            <div className="admin-subtext">{item.product_category}</div>
+                                                        )}
+                                                    </td>
+                                                    <td>{item.product_sku || '—'}</td>
+                                                    <td>{item.quantity}</td>
+                                                    <td>{formatMoney(item.unit_price)}</td>
+                                                    <td>
+                                                        {item.discount_amount > 0 ? (
+                                                            <div>
+                                                                <span className="admin-discount">−{formatMoney(item.discount_amount)}</span>
+                                                                {appliedRule && (
+                                                                    <div className="store-item-rule" style={{ fontSize: '10px', marginLeft: 0 }}>
+                                                                        {appliedRule}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            formatMoney(0)
+                                                        )}
+                                                    </td>
+                                                    <td style={{ textAlign: 'right', fontWeight: 700 }}>
+                                                        {formatMoney(item.line_total)}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="admin-suborder-sum" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', fontSize: '13px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', minWidth: '220px' }}>
+                                    <span>Subtotal:</span>
+                                    <span>{formatMoney(subOrder.subtotal)}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', minWidth: '220px' }}>
+                                    <span>Discounts:</span>
+                                    <span className="admin-discount">−{formatMoney(subOrder.discount_total)}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', minWidth: '220px', fontWeight: 700, borderTop: '1px solid var(--c-border, #e4e2da)', paddingTop: '4px', marginTop: '4px' }}>
+                                    <span>Total for {subOrder.vendor?.name}:</span>
+                                    <span>{formatMoney(subOrder.total)}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="admin-suborder-sum">
-                            <div><span>Subtotal</span><span>{formatMoney(subOrder.subtotal)}</span></div>
-                            <div><span>Discounts</span><span className="admin-discount">−{formatMoney(subOrder.discount_total)}</span></div>
-                            <div className="admin-suborder-sum-grand"><span>Total</span><span>{formatMoney(subOrder.total)}</span></div>
-                            <div><span>Notification</span><span>{subOrder.notification_status}{subOrder.notified_at && ` • ${new Date(subOrder.notified_at).toLocaleString()}`}</span></div>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
 }
+

@@ -36,7 +36,7 @@ export default function AccountPanel({ user, onUserChange, onLogout }) {
             .then(({ data }) => setDiscounts(data.data))
             .catch(() => setDiscounts([]));
 
-        window.axios.get('/api/account/orders')
+        window.axios.get('/api/orders')
             .then(({ data }) => setOrders(data.data))
             .catch(() => setOrders([]));
     }, []);
@@ -157,22 +157,26 @@ export default function AccountPanel({ user, onUserChange, onLogout }) {
 
             <section className="account-section">
                 <h3>My orders</h3>
-                {orders?.length > 0 ? (
+                {orders === null && <p className="account-empty">Loading your orders...</p>}
+                {orders !== null && orders.length === 0 && (
+                    <p className="account-empty">You haven’t placed any orders yet.</p>
+                )}
+                {orders?.length > 0 && (
                     <ul className="account-orders">
                         {orders.map((order) => (
-                            <li key={order.id}>
-                                <div>
+                            <li key={order.id} className="account-order-item">
+                                <div className="account-order-main">
                                     <strong>{order.order_number}</strong>
-                                    <span>{new Date(order.placed_at).toLocaleDateString()}</span>
+                                    <span>{order.placed_at ? new Date(order.placed_at).toLocaleDateString() : '—'} • {order.sub_orders_count ?? order.sub_orders?.length ?? 1} vendor{(order.sub_orders_count ?? order.sub_orders?.length ?? 1) === 1 ? '' : 's'}</span>
                                 </div>
-                                <span>{order.status}</span>
-                                <span>{order.sub_orders_count ?? order.sub_orders?.length ?? 0} vendors</span>
+                                <span className={`store-status-pill status-${order.status}`}>{order.status}</span>
                                 <strong>${order.total}</strong>
+                                <a href={`/order-confirmation/${order.id}`} className="account-order-view gg-button gg-button--secondary gg-button--sm">
+                                    View
+                                </a>
                             </li>
                         ))}
                     </ul>
-                ) : (
-                    <p className="account-empty">Your order history will appear here once ordering is available.</p>
                 )}
             </section>
         </div>

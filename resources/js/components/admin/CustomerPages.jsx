@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AdminPageHeader, ApiErrors, Pagination } from './shared';
+import { formatMoney } from '../store/formatMoney';
 
 export default function CustomerPages({ path }) {
     const parts = path.split('/').filter(Boolean);
@@ -76,7 +77,25 @@ function CustomerList() {
 function CustomerDetail({ customerId }) {
     const [customer, setCustomer] = useState(null);
     const [rules, setRules] = useState(null);
+    const [orders, setOrders] = useState([]);
+    const [lifetimeTotal, setLifetimeTotal] = useState('0.00');
+    const [ordersMeta, setOrdersMeta] = useState(null);
+    const [ordersLoading, setOrdersLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const loadOrders = (url) => {
+        setOrdersLoading(true);
+        window.axios.get(url)
+            .then(({ data }) => {
+                setOrders(data.data || []);
+                setOrdersMeta(data.meta || null);
+                if (data.lifetime_total !== undefined) {
+                    setLifetimeTotal(data.lifetime_total);
+                }
+            })
+            .catch(() => {})
+            .finally(() => setOrdersLoading(false));
+    };
 
     async function load() {
         setError(null);
@@ -93,7 +112,10 @@ function CustomerDetail({ customerId }) {
         }
     }
 
-    useEffect(() => { load(); }, [customerId]);
+    useEffect(() => {
+        load();
+        loadOrders(`/api/admin/customers/${customerId}/orders`);
+    }, [customerId]);
 
     async function toggle(rule) {
         setError(null);
@@ -167,6 +189,85 @@ function CustomerDetail({ customerId }) {
                         {!rules && <tr><td colSpan="4" className="admin-empty">Loading loyalty rules...</td></tr>}
                     </tbody>
                 </table>
+            </section>
+
+            <section className="admin-form-section">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <h2 style={{ margin: 0 }}>Customer Order History</h2>
+                    <span style={{ fontSize: '13px', color: 'var(--c-muted)' }}>
+                        Lifetime spend: <strong>{formatMoney(lifetimeTotal)}</strong>
+                    </span>
+                </div>
+
+                <div className="admin-table-wrapper">
+                    <table className="admin-table gg-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Placed</th>
+                                <th>Vendors</th>
+                                <th>Items</th>
+                                <th>Status</th>
+                                <th style={{ textAlign: 'right' }}>Total</th>
+                                <th style={{ textAlign: 'right' }}>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {ordersLoading ? (
+                                <tr><td colSpan="7" style={{ padding: '20px', textAlign: 'center' }}>Loading orders...</td></tr>
+                            ) : orders.length === 0 ? (
+                                <tr><td colSpan="7" style={{ padding: '20px', textAlign: 'center', color: 'var(--c-muted)' }}>No orders placed by this customer yet.</td></tr>
+                            ) : (
+                                orders.map((order) => (
+                                    <tr key={order.id}>
+                                        <td>
+                                            <a href={`/admin/orders/${order.id}`} className="admin-link" style={{ fontWeight: 700 }}>
+                                                {order.order_number}
+                                            </a>
+                                        </td>
+                                        <td>{order.placed_at ? new Date(order.placed_at).toLocaleDateString() : '—'}</td>
+                                        <td>{order.sub_orders_count ?? 1}</td>
+                                        <td>{order.items_count ?? '—'}</td>
+                                        <td>
+                                            <span className={`store-status-pill status-${order.status}`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td style={{ textAlign: 'right', fontWeight: 700 }}>
+                                            {formatMoney(order.total)}
+                                        </td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <a href={`/admin/orders/${order.id}`} className="gg-button gg-button--secondary gg-button--sm">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {ordersMeta && ordersMeta.last_page > 1 && (
+                    <div className="admin-pagination" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                        <button
+                            type="button"
+                            className="gg-button gg-button--secondary gg-button--sm"
+                            disabled={!ordersMeta.prev_page_url}
+                            onClick={() => loadOrders(ordersMeta.prev_page_url)}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="gg-button gg-button--secondary gg-button--sm"
+                            disabled={!ordersMeta.next_page_url}
+                            onClick={() => loadOrders(ordersMeta.next_page_url)}
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
             </section>
         </>
     );

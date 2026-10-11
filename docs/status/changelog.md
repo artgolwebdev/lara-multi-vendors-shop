@@ -2,6 +2,21 @@
 
 ## 2026-10-11
 
+- Implemented plan 008: UX/UI polish, design tokens, shared UI primitives, and checkout/confirmation fixes.
+  - Added CSS custom property tokens (`resources/css/tokens.css`) and neutral `gg-*` primitives (`resources/css/ui.css`, `resources/js/components/ui/*`).
+  - Fixed order confirmation crash (`ReferenceError: user is not defined`), added order details, delivery card, per-vendor sub-orders with applied discount rule labels, and clearCart dispatch on completion.
+  - Fixed customer account order history endpoint (`/api/orders`), added live list with status badges and direct links to order confirmation.
+  - Redesigned checkout with responsive two-column layout, Steps indicator, per-field validation error displays, guest registration callout, and 409 Conflict price re-confirmation flow (`expected_total`).
+  - Rewrote admin orders index with multi-criteria filtering (search, status, vendor, customer, date range), Apply/Reset, active filter chips, URL persistence, and items count.
+  - Redesigned admin order detail with sub-order status controls, conditional vendor notification dispatch, and items tables; added matching order history and sales/spend metrics to admin vendor and customer detail pages.
+  - Verified tests (142 tests, 645 assertions passing), Pint formatting passed, and asset compilation (`npm run build`) succeeded.
+- Implemented plan 007: orders, checkout, vendor notifications, and admin order management.
+  - Added order, sub-order, and order item models, migrations, relationships, and status workflows.
+  - Added storefront checkout endpoint (`POST /api/orders`) with atomic order creation, optimistic total check (`409 Conflict`), guest access token, and COD payment support.
+  - Added queued vendor notifications (`NotifyVendorJob`) and re-send triggers for sub-orders.
+  - Added customer order history (`GET /api/orders`) and single order access (`GET /api/orders/{order}`) with guest token and owner access checks.
+  - Added admin order management APIs (`GET /api/admin/orders`, `GET /api/admin/orders/{order}`, `PATCH /api/admin/sub-orders/{subOrder}/status`, `POST /api/admin/sub-orders/{subOrder}/notify`).
+
 - Implemented plan 006: customer accounts and loyalty discounts. Added `phone`/`address` to users, loyalty fields (`loyalty_condition`, `audience`) and a `discount_rule_user` pivot to discount rules, and a `loyalty` rule type discovered through the existing tagged `discount.rules` binding.
 - Added `LoyaltyCustomerDiscountRule` with `DiscountContext`, the `CustomerOrderHistory` contract and a default zero-order implementation; `apply()`/`calculate()` now accept an optional context, and `AppliedRule`/`PriceQuoteLine` expose `rule_type`/`is_loyalty`.
 - Added account APIs (`/api/account/profile`, `/api/account/password`, `/api/account/discounts`, `/api/account/orders`) and admin customer APIs with selected-customer loyalty grant/revoke; the quote endpoint now takes the authenticated customer and returns guest `promotions`.

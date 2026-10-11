@@ -12,6 +12,7 @@ import { formatMoney } from '../formatMoney';
 import CartLine from '../CartLine';
 import EmptyState from '../EmptyState';
 import ErrorState from '../ErrorState';
+import Steps from '../../ui/Steps';
 
 export default function CartPage() {
     const lines = useSelector(selectCartLines);
@@ -40,6 +41,15 @@ export default function CartPage() {
 
     return (
         <div className="store-section">
+            <Steps
+                steps={[
+                    { key: 'cart', label: 'Cart' },
+                    { key: 'checkout', label: 'Checkout' },
+                    { key: 'confirmation', label: 'Confirmation' },
+                ]}
+                current={0}
+            />
+
             <div className="store-section-head">
                 <h1>Your cart</h1>
                 {status === 'loading' && <span className="store-state-text" role="status">Updating prices...</span>}

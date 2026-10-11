@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductOffer;
 use App\Models\Vendor;
@@ -22,6 +23,7 @@ class DashboardController extends Controller
                     ->where('is_active', true)
                     ->whereHas('vendor', fn ($query) => $query->where('is_active', true))
                     ->count(),
+                'orders' => Order::query()->count(),
             ],
         ]);
     }

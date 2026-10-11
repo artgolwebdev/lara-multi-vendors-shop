@@ -28,8 +28,8 @@ class OrderController extends Controller
         $perPage = min(max($request->integer('per_page', 20), 1), 100);
 
         $query = Order::query()
-            ->withCount('subOrders')
-            ->with('user:id,name,email')
+            ->withCount(['subOrders', 'items'])
+            ->with(['user:id,name,email', 'subOrders'])
             ->orderByDesc('placed_at')
             ->orderByDesc('id');
 
@@ -121,7 +121,8 @@ class OrderController extends Controller
 
         $orders = Order::query()
             ->where('user_id', $customer->id)
-            ->withCount('subOrders')
+            ->withCount(['subOrders', 'items'])
+            ->with('subOrders')
             ->orderByDesc('placed_at')
             ->orderByDesc('id')
             ->paginate(20);

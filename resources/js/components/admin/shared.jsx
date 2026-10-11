@@ -1,22 +1,25 @@
-export function ApiErrors({ error }) {
+﻿export function ApiErrors({ error }) {
     const errors = error?.response?.data?.errors;
     const messages = errors ? Object.values(errors).flat() : [error?.response?.data?.message || 'The request could not be completed.'];
 
     return (
-        <div className="admin-alert admin-alert-error" role="alert">
-            {messages.map((message, index) => <p key={`${message}-${index}`}>{message}</p>)}
+        <div className="admin-alert admin-alert-error gg-alert gg-alert--danger" role="alert">
+            {messages.map((message, index) => (
+                <p key={`${message}-${index}`}>{message}</p>
+            ))}
         </div>
     );
 }
 
-export function AdminPageHeader({ eyebrow, title, action }) {
+export function AdminPageHeader({ eyebrow, title, action, actions }) {
+    const rightActions = action || actions;
     return (
-        <header className="admin-page-header">
+        <header className="admin-page-header gg-page-header">
             <div>
-                <p className="admin-eyebrow">{eyebrow}</p>
+                {eyebrow && <p className="admin-eyebrow gg-page-header__eyebrow">{eyebrow}</p>}
                 <h1>{title}</h1>
             </div>
-            {action}
+            {rightActions && <div className="admin-page-header-actions gg-page-header__actions">{rightActions}</div>}
         </header>
     );
 }
@@ -28,8 +31,22 @@ export function Pagination({ links, onNavigate }) {
 
     return (
         <nav className="admin-pagination" aria-label="Pagination">
-            <button type="button" disabled={!links.prev} onClick={() => onNavigate(links.prev)}>Previous</button>
-            <button type="button" disabled={!links.next} onClick={() => onNavigate(links.next)}>Next</button>
+            <button
+                type="button"
+                className="gg-button gg-button--secondary gg-button--sm"
+                disabled={!links.prev}
+                onClick={() => onNavigate(links.prev)}
+            >
+                Previous
+            </button>
+            <button
+                type="button"
+                className="gg-button gg-button--secondary gg-button--sm"
+                disabled={!links.next}
+                onClick={() => onNavigate(links.next)}
+            >
+                Next
+            </button>
         </nav>
     );
 }
@@ -39,6 +56,24 @@ export function navigateWithFlash(path, message) {
     window.location.assign(path);
 }
 
-export function StatusBadge({ active }) {
-    return <span className={`admin-status ${active ? 'is-active' : 'is-inactive'}`}>{active ? 'Active' : 'Inactive'}</span>;
+export function StatusBadge({ active, className = '' }) {
+    return <span className={`admin-status ${active ? 'is-active' : 'is-inactive'} ${className}`.trim()}>{active ? 'Active' : 'Inactive'}</span>;
+}
+
+export function AdminAlert({ type = 'info', children }) {
+    const typeClass =
+        type === 'danger' || type === 'error'
+            ? 'admin-alert-error'
+            : type === 'success'
+            ? 'admin-alert-success'
+            : '';
+    const ggType = type === 'error' ? 'danger' : type;
+    return (
+        <div
+            className={`admin-alert ${typeClass} gg-alert gg-alert--${ggType}`}
+            role={type === 'danger' || type === 'error' ? 'alert' : 'status'}
+        >
+            {children}
+        </div>
+    );
 }

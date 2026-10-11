@@ -12,7 +12,7 @@ class StorefrontPagesTest extends TestCase
      */
     public function test_storefront_routes_render_the_spa_host(): void
     {
-        foreach (['/', '/shop', '/categories', '/categories/1', '/products/1', '/cart'] as $path) {
+        foreach (['/', '/shop', '/categories', '/categories/1', '/products/1', '/cart', '/checkout', '/order-confirmation/1'] as $path) {
             $this->get($path)
                 ->assertOk()
                 ->assertViewIs('store-app')

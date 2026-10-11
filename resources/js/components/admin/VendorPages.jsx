@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AdminPageHeader, ApiErrors, navigateWithFlash, Pagination, StatusBadge } from './shared';
+import { formatMoney } from '../store/formatMoney';
 
 const emptyVendor = {
     name: '', email: '', phone: '', address: '', city: '', country: '', contact_person: '', notes: '', is_active: true,
@@ -158,12 +159,32 @@ function VendorForm({ vendorId }) {
 function VendorDetail({ vendorId }) {
     const [vendor, setVendor] = useState(null);
     const [error, setError] = useState(null);
+    const [orders, setOrders] = useState([]);
+    const [totalSales, setTotalSales] = useState('0.00');
+    const [ordersMeta, setOrdersMeta] = useState(null);
+    const [ordersLoading, setOrdersLoading] = useState(true);
 
     useEffect(() => {
         window.axios.get(`/api/admin/vendors/${vendorId}`)
             .then(({ data }) => setVendor(data.data))
             .catch(setError);
+
+        loadOrders(`/api/admin/vendors/${vendorId}/orders`);
     }, [vendorId]);
+
+    const loadOrders = (url) => {
+        setOrdersLoading(true);
+        window.axios.get(url)
+            .then(({ data }) => {
+                setOrders(data.data || []);
+                setOrdersMeta(data.meta || null);
+                if (data.total_sales !== undefined) {
+                    setTotalSales(data.total_sales);
+                }
+            })
+            .catch(() => {})
+            .finally(() => setOrdersLoading(false));
+    };
 
     if (error) {
         return <ApiErrors error={error} />;
@@ -188,8 +209,92 @@ function VendorDetail({ vendorId }) {
                 <div><dt>Address</dt><dd>{vendor.address || '—'}</dd></div>
                 <div><dt>Notes</dt><dd>{vendor.notes || '—'}</dd></div>
                 <div><dt>Status</dt><dd><StatusBadge active={vendor.is_active} /></dd></div>
+                <div><dt>Total Sales</dt><dd><strong>{formatMoney(totalSales)}</strong></dd></div>
             </dl>
-            <a className="admin-back-link" href="/admin/vendors">Back to vendors</a>
+
+            <section className="admin-form-section" style={{ marginTop: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <h2 style={{ margin: 0 }}>Vendor Orders & Fulfillment</h2>
+                    <span style={{ fontSize: '13px', color: 'var(--c-muted)' }}>
+                        Fulfilled sales: <strong>{formatMoney(totalSales)}</strong>
+                    </span>
+                </div>
+
+                <div className="admin-table-wrapper">
+                    <table className="admin-table gg-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Placed</th>
+                                <th>Status</th>
+                                <th style={{ textAlign: 'right' }}>Vendor Total</th>
+                                <th style={{ textAlign: 'right' }}>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {ordersLoading ? (
+                                <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center' }}>Loading orders...</td></tr>
+                            ) : orders.length === 0 ? (
+                                <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: 'var(--c-muted)' }}>No orders for this vendor yet.</td></tr>
+                            ) : (
+                                orders.map((order) => {
+                                    const subOrder = order.sub_orders?.[0];
+                                    return (
+                                        <tr key={order.id}>
+                                            <td>
+                                                <a href={`/admin/orders/${order.id}`} className="admin-link" style={{ fontWeight: 700 }}>
+                                                    {order.order_number}
+                                                </a>
+                                            </td>
+                                            <td>{order.customer?.name || 'Guest'}</td>
+                                            <td>{order.placed_at ? new Date(order.placed_at).toLocaleDateString() : '—'}</td>
+                                            <td>
+                                                <span className={`store-status-pill status-${subOrder?.status || order.status}`}>
+                                                    {subOrder?.status || order.status}
+                                                </span>
+                                            </td>
+                                            <td style={{ textAlign: 'right', fontWeight: 700 }}>
+                                                {formatMoney(subOrder?.total || order.total)}
+                                            </td>
+                                            <td style={{ textAlign: 'right' }}>
+                                                <a href={`/admin/orders/${order.id}`} className="gg-button gg-button--secondary gg-button--sm">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {ordersMeta && ordersMeta.last_page > 1 && (
+                    <div className="admin-pagination" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                        <button
+                            type="button"
+                            className="gg-button gg-button--secondary gg-button--sm"
+                            disabled={!ordersMeta.prev_page_url}
+                            onClick={() => loadOrders(ordersMeta.prev_page_url)}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="gg-button gg-button--secondary gg-button--sm"
+                            disabled={!ordersMeta.next_page_url}
+                            onClick={() => loadOrders(ordersMeta.next_page_url)}
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
+            </section>
+
+            <p style={{ marginTop: '20px' }}>
+                <a className="admin-back-link" href="/admin/vendors">← Back to vendors</a>
+            </p>
         </>
     );
 }
