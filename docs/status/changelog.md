@@ -2,6 +2,7 @@
 
 ## 2026-10-11
 
+- Started plan 011: made the storefront header sticky and added a compact mobile disclosure for primary navigation, search, cart count, and account actions. At the available ~506px browser width, the header stayed visible while scrolling; the menu exposed its state, closed on Escape, and the account page stacked. Production build and focused storefront tests passed (5 tests, 41 assertions). Exact plan viewport widths and authenticated admin UI review remain outstanding.
 - Added the assignment audit report and reconciled architecture, database, product, user-flow, system-component, known-issue, and test documentation with the implemented checkout/order workflow. Recorded the latest plan 010 test results as historical verification; the audit did not rerun tests.
 - Updated `DiscountRuleSeeder` so every sample discount rule uses priority 30, the same as “Welcome discount.” Added a regression test asserting the shared priority and confirming welcome loyalty plus matching product/storewide quantity discounts appear together on a seeded first-order cart; the focused catalog feature tests pass (11 tests, 73 assertions).
 - Implemented plan 010: normalized non-loyalty discount rule audiences to `all_customers` in the React admin form and both store/update requests, preserving the non-null database invariant and selected-customer loyalty synchronization.

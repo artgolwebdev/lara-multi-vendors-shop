@@ -79,27 +79,56 @@ function AccountMenu() {
 
 export default function StoreLayout() {
     const dispatch = useDispatch();
+    const location = useLocation();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         dispatch(fetchUser());
     }, [dispatch]);
 
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+    }, [location.pathname, location.search]);
+
     return (
         <div className="store-shell">
             <QuoteSync />
-            <header className="store-header">
-                <Link className="wordmark" to="/">goodgoods<span>.</span></Link>
+            <header
+                className={`store-header${isMobileMenuOpen ? ' is-menu-open' : ''}`}
+                onKeyDown={(event) => {
+                    if (event.key === 'Escape') {
+                        setIsMobileMenuOpen(false);
+                    }
+                }}
+            >
+                <div className="store-header-top">
+                    <Link className="wordmark" to="/">goodgoods<span>.</span></Link>
+                    <div className="store-header-mobile-actions">
+                        <CartIndicator />
+                        <button
+                            className="store-menu-toggle"
+                            type="button"
+                            aria-expanded={isMobileMenuOpen}
+                            aria-controls="store-header-menu"
+                            onClick={() => setIsMobileMenuOpen((isOpen) => !isOpen)}
+                        >
+                            {isMobileMenuOpen ? 'Close' : 'Menu'}
+                        </button>
+                    </div>
+                </div>
 
-                <nav className="store-nav" aria-label="Primary">
-                    <NavLink to="/" end>Home</NavLink>
-                    <NavLink to="/shop">Shop</NavLink>
-                    <NavLink to="/categories">Categories</NavLink>
-                </nav>
+                <div className="store-header-menu" id="store-header-menu">
+                    <nav className="store-nav" aria-label="Primary">
+                        <NavLink to="/" end>Home</NavLink>
+                        <NavLink to="/shop">Shop</NavLink>
+                        <NavLink to="/categories">Categories</NavLink>
+                    </nav>
 
-                <div className="store-header-actions">
-                    <SearchBox />
-                    <CartIndicator />
-                    <AccountMenu />
+                    <div className="store-header-actions">
+                        <SearchBox />
+                        <CartIndicator />
+                        <AccountMenu />
+                    </div>
                 </div>
             </header>
 

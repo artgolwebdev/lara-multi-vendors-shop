@@ -14,3 +14,4 @@ This index contains only identified work. There is no confirmed feature roadmap 
 | `008-ux-ui-and-checkout-fixes` | UX/UI polish and checkout/confirmation fixes | completed | [Plan 008](008-ux-ui-and-checkout-fixes-plan.md) |
 | `009-login-register-system-design` | Login and register system design alignment | completed | [Plan 009](009-login-register-system-design-plan.md) |
 | `010-discount-rule-audience-save` | Prevent null audience when saving non-loyalty discount rules; verify loyalty and quantity stacking | completed | [Plan 010](010-discount-rule-audience-save-plan.md) |
+| `011-mobile-ux-persistent-header` | Improve responsive UX/UI and keep the storefront header visible while scrolling | in_progress | [Plan 011](011-mobile-ux-and-persistent-header-plan.md) |
