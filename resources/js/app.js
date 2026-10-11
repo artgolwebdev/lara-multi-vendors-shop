@@ -13,12 +13,20 @@ import './bootstrap';
  */
 
 import '../css/auth.css';
+import '../css/admin.css';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import AuthApp from './components/AuthApp';
+import AdminApp from './components/AdminApp';
 
 const rootElement = document.getElementById('auth-app');
 
 if (rootElement) {
 	createRoot(rootElement).render(createElement(AuthApp));
+}
+
+const adminRootElement = document.getElementById('admin-app');
+
+if (adminRootElement) {
+	createRoot(adminRootElement).render(createElement(AdminApp));
 }

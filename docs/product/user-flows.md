@@ -31,6 +31,19 @@ flowchart TD
 
 The route list confirms the Laravel UI login/register, logout, password confirmation/reset, and authenticated home routes. Laravel UI supplies this web flow. Email verification controller and view files exist, but the route list does not expose verification routes.
 
-## Product Flows Not Yet Defined
+## Admin Catalog Flow
 
-Vendor and buyer catalog/order journeys remain unimplemented; see [product requirements](requirements.md) for the confirmed task scope.
+```mermaid
+flowchart TD
+    Admin[Admin signs in] --> Mount[GET /admin protected mount]
+    Mount --> React[React admin workspace]
+    React --> Dashboard[GET /api/admin/dashboard]
+    React --> Vendors[Vendor CRUD API]
+    React --> Products[Product CRUD API]
+    Products --> Upload[Validated public-disk image uploads]
+    Products --> Offers[Transactional vendor offer sync]
+```
+
+Admin route mounts require an authenticated admin. Guests are redirected to login, and authenticated non-admins receive 403. Registration cannot set admin status. Vendors are managed as records and never sign in.
+
+Public product browsing, cart, buyer ordering, and vendor notifications remain unimplemented; see [product requirements](requirements.md).

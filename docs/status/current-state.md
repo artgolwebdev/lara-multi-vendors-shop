@@ -1,6 +1,6 @@
 # Current State
 
-Last verified: 2026-10-10.
+Last verified: 2026-10-11.
 
 ## Runtime and Dependencies
 
@@ -14,11 +14,14 @@ Last verified: 2026-10-10.
 ## Implemented Application
 
 - A React authentication page at `/`, with registration/login/logout through same-origin Sanctum session API endpoints. Laravel UI web authentication/password-reset routes and authenticated `/home` remain available.
-- Auth API routes: `POST /api/register`, `POST /api/login`, `POST /api/logout`, and authenticated `GET /api/user`.
-- One application domain model (`User`); Laravel infrastructure/auth schema plus Sanctum `personal_access_tokens`. Vendor/catalog/order/payment models remain unimplemented.
-- Blade and React/Vite frontend with Bootstrap/Sass and Tailwind/Vite assets. No Inertia or Livewire integration was found.
-- Five tests. Latest `php artisan test --compact` passed: 5 tests and 20 assertions.
+- `is_admin` defaults false, is excluded from mass assignment, and is rejected by web/API registration. `EnsureUserIsAdmin` protects all admin screens and JSON endpoints.
+- Admin React screens provide dashboard counts, vendor CRUD, and product CRUD with image upload/removal and per-vendor pricing. APIs paginate catalog lists; offers sync in a transaction.
+- Domain models include `User`, `Vendor`, `Product`, `ProductImage`, and `ProductOffer`; the schema includes vendor/product soft deletes, image storage metadata, and indexed product/vendor offers.
+- `DatabaseSeeder` calls a development-only sample seeder for the requested admin account and example vendor/catalog data. It does not seed the admin in production.
+- Blade and React/Vite frontend with Bootstrap/Sass and Tailwind/Vite assets. No Inertia, Livewire, or client-side router package is used.
+- PHPUnit: 17 tests and 117 assertions pass, covering admin authorization, vendor/product CRUD, upload validation, offer sync and lowest price, and registration privilege boundaries.
 - The Sanctum migration has been applied to the configured MySQL database in this environment; repository defaults still select SQLite where environment configuration does not override them.
+- Plan 003 migrations passed on disposable SQLite; the configured MySQL database was not changed. Apply pending migrations to the intended database with `php artisan migrate`.
 
 ## AI and Project Context
 

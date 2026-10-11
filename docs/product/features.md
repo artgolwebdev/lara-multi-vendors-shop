@@ -11,5 +11,9 @@ This inventory describes code verified in the repository, not an intended market
 | Authenticated home | `/home` uses `HomeController`; constructor applies `auth` middleware | `routes/web.php`, `app/Http/Controllers/HomeController.php` |
 | Password reset | Laravel UI reset form and submission routes/controllers | `routes/web.php`, auth controllers/views |
 | React/Vite integration | Vite mounts the authentication component at the root page | `resources/js/app.js`, `vite.config.js` |
+| Admin access | `is_admin` flag and admin middleware protect admin pages and APIs | `app/Models/User.php`, `app/Http/Middleware/EnsureUserIsAdmin.php`, `bootstrap/app.php` |
+| Admin catalog UI | React/Vite dashboard, vendor CRUD, and product CRUD | `resources/js/components/AdminApp.jsx`, `resources/js/components/admin/` |
+| Vendor records | Admin-managed vendor CRUD with soft deletes | `app/Models/Vendor.php`, `app/Http/Controllers/Api/Admin/VendorController.php` |
+| Shared catalog and offers | Products, public-disk images, vendor-specific offers, and lowest active offer | `app/Models/Product.php`, `ProductImage.php`, `ProductOffer.php`, `app/Http/Controllers/Api/Admin/ProductController.php` |
 
-Vendor, product-catalog, cart, checkout, order, payment, notification, and discount features are confirmed future task scope but remain unimplemented. See [requirements](requirements.md) and [API surface](../api/endpoints.md).
+Public product listing, cart, checkout, orders, payment, notifications, and discount rules remain unimplemented. See [requirements](requirements.md) and [API surface](../api/endpoints.md).

@@ -1,5 +1,12 @@
 # Documentation Changelog
 
+## 2026-10-11
+
+- Implemented plan 003: admin-only React catalog workspace, protected web/API routes, managed vendors, products, public-disk product images, and vendor-specific offers.
+- Added `is_admin` default false with registration and mass-assignment protections; the non-production sample seeder provisions the requested admin account and sample catalog data.
+- Added feature coverage for admin access, vendor CRUD, product images/offers, lowest active offer, and admin privilege protection.
+- Replaced the earlier vendor-self-service direction with admin-managed vendor records; orders, discounts, public shop, and vendor login remain out of scope.
+
 ## 2026-10-10
 
 - Added persistent project documentation based on inspected code, route list, installed package versions, and Boost database schema.

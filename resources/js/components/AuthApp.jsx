@@ -90,6 +90,7 @@ export default function AuthApp() {
                         <h2>Welcome back,<br />{user.name}.</h2>
                         <p className="form-intro">Your marketplace is ready when you are.</p>
                         {error && <p className="form-error" role="alert">{error}</p>}
+                        {user.is_admin && <a className="admin-entry-link" href="/admin">Admin dashboard <span aria-hidden="true">&#8599;</span></a>}
                         <button className="primary-button" type="button" onClick={logout} disabled={submitting}>
                             {submitting ? 'Signing out...' : 'Sign out'}
                             <span aria-hidden="true">↗</span>

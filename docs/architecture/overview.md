@@ -2,16 +2,21 @@
 
 ## Current Shape (Verified)
 
-This Laravel application serves a React authentication page from `/` and retains Blade/Laravel UI web pages. React uses the same-origin JSON authentication API with Sanctum stateful sessions. Vite builds the CSS, Sass, and JavaScript entry points. Vendor/catalog domain features are not implemented yet; there is no Inertia or Livewire integration.
+This Laravel application serves React authentication and admin catalog pages through Blade mount views. React uses same-origin JSON APIs with Sanctum stateful sessions. Admin JSON routes add a dedicated admin middleware check. Vite builds the CSS, Sass, and JavaScript entry points. There is no Inertia or Livewire integration.
 
 ```mermaid
 flowchart LR
     Browser --> Laravel[Laravel 13 application]
     Laravel --> WebRoutes[Web routes]
     WebRoutes --> ReactPage[React auth mount page]
+    WebRoutes --> AdminPage[Protected React admin mount]
     ReactPage --> Vite[Vite assets]
+    AdminPage --> Vite
     ReactPage --> ApiRoutes[Stateful API routes]
     ApiRoutes --> ApiAuth[Sanctum AuthController]
+    ApiRoutes --> AdminApi[Admin catalog APIs]
+    AdminApi --> Catalog[Vendor, product, image, offer models]
+    Catalog --> DB
     WebRoutes --> Auth[Laravel UI auth controllers]
     WebRoutes --> Home[HomeController]
     Auth --> Views[Blade auth views]

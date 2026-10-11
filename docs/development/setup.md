@@ -14,7 +14,9 @@
 3. Configure database and other environment values locally; do not commit secrets.
 4. Install JS dependencies with `npm install`.
 5. Apply migrations with `php artisan migrate`.
-6. Run the application and asset watcher with `composer run dev`, or run `php artisan serve` and `npm run dev` separately.
+6. Create the public storage symlink with `php artisan storage:link` so uploaded product images can be served.
+7. Seed local/sample admin and catalog data with `php artisan db:seed`. The admin sample seeder is skipped in production.
+8. Run the application and asset watcher with `composer run dev`, or run `php artisan serve` and `npm run dev` separately.
 
 The repository also defines `composer run setup`; inspect its script in `composer.json` before running because it installs dependencies, creates environment state, migrates, and builds assets. Environment variable names and purpose are described without values in the root `.env.example`; no `.env` values are reproduced here.
 
