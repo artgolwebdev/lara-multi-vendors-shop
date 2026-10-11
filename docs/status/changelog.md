@@ -2,6 +2,11 @@
 
 ## 2026-10-11
 
+- Implemented plan 005: a public storefront (React Router + Redux Toolkit) with home, shop, category, product, and cart pages, backed by read-only catalog APIs and a stateless cart-quote endpoint.
+- Added `app/Services/Cart/CartQuoter` (offer resolution, engine delegation, per-vendor grouping, line-keyed validation, single-call listing prices) and `app/Services/Discounts/DiscountHintResolver` for quantity hints; all pricing comes from the existing `DiscountEngine`.
+- Added public `GET /api/products`, `GET /api/products/{product}`, `GET /api/categories`, `GET /api/categories/{category}`, and `POST /api/cart/quote`, with `CartQuoteRequest` and listing/detail/category resources.
+- Moved the React auth SPA from `/` to `/account`; the storefront SPA now owns `/`, `/shop`, `/categories`, `/categories/{category}`, `/products/{product}`, and `/cart` (`store-app`), with the guest cart persisted in `localStorage` (`goodgoods.cart.v1`) and re-priced by a debounced, abortable thunk.
+- Added storefront, cart-quote, and cart-quoter/hint-resolver tests (97 tests, 490 assertions) and `npm run build` output.
 - Implemented plan 004: admin-managed quantity and category discount rules, a categories table replacing the product string category, and a stateless integer-cent discount engine with tagged rule implementations.
 - Added `app/Services/Discounts` (`DiscountRuleInterface`, `QuantityDiscountRule`, `CategoryDiscountRule`, `DiscountEngine`, `Money`, and immutable DTOs); matching rules stack cumulatively per line and are capped at the line subtotal.
 - Added category and discount-rule admin APIs, routes, Form Requests, resources, factories, seeders, React admin screens with computed statuses and a live test panel, plus discount unit and feature tests (54 tests, 276 assertions).

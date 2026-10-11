@@ -4,12 +4,36 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    return view('store-app');
+})->name('store.home');
+
+Route::get('/shop', function () {
+    return view('store-app');
+})->name('store.shop');
+
+Route::get('/categories', function () {
+    return view('store-app');
+})->name('store.categories');
+
+Route::get('/categories/{category}', function () {
+    return view('store-app');
+})->name('store.category');
+
+Route::get('/products/{product}', function () {
+    return view('store-app');
+})->name('store.product');
+
+Route::get('/cart', function () {
+    return view('store-app');
+})->name('store.cart');
+
+Route::get('/account', function () {
     return view('auth-app');
-});
+})->name('account');
 
 Auth::routes();
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+//Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function (): void {
     Route::view('/', 'admin-app')->name('dashboard');

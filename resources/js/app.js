@@ -14,10 +14,18 @@ import './bootstrap';
 
 import '../css/auth.css';
 import '../css/admin.css';
+import '../css/store.css';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import AuthApp from './components/AuthApp';
 import AdminApp from './components/AdminApp';
+import StoreApp from './components/store/StoreApp';
+
+const storeRootElement = document.getElementById('store-app');
+
+if (storeRootElement) {
+	createRoot(storeRootElement).render(createElement(StoreApp));
+}
 
 const rootElement = document.getElementById('auth-app');
 

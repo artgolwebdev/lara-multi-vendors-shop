@@ -1,12 +1,30 @@
 # User Flows
 
+## Storefront Shopping Flow
+
+```mermaid
+flowchart TD
+    Guest[Guest] --> Home[GET / storefront SPA]
+    Home --> Shop[GET /api/products search/sort/page]
+    Home --> Categories[GET /api/categories]
+    Categories --> Category[GET /api/categories/{id} and its products]
+    Shop --> Detail[GET /api/products/{product}]
+    Detail --> Add[Add {product_id, vendor_id, quantity} to cart]
+    Add --> Persist[Persist lines to localStorage]
+    Persist --> Quote[POST /api/cart/quote debounced]
+    Quote --> Quoter[CartQuoter resolves offers and runs the engine]
+    Quoter --> Totals[Per-line discounts and per-vendor totals]
+```
+
+Guests can browse and build a cart without registering. The browser stores only product/vendor IDs and quantities and never computes prices; the storefront posts the cart to the stateless quote endpoint, which resolves the selected or lowest active offer per line, applies discount rules, and returns line and per-vendor totals. The cart survives a page refresh via `localStorage`.
+
 ## Current React/API Authentication Flow
 
 ```mermaid
 flowchart TD
-    Visitor[Visitor] --> Root[GET / React auth page]
-    Root --> Register[POST /api/register]
-    Root --> Login[POST /api/login]
+    Visitor[Visitor] --> Account[GET /account React auth page]
+    Account --> Register[POST /api/register]
+    Account --> Login[POST /api/login]
     Register -->|session cookie| SignedIn[Authenticated React state]
     Login -->|session cookie| SignedIn
     SignedIn --> CurrentUser[GET /api/user]
@@ -14,7 +32,7 @@ flowchart TD
     Logout --> Visitor
 ```
 
-The React page first requests `/api/user`; the expected unauthenticated response displays sign-in. Registration and login obtain the Sanctum CSRF cookie before submitting. Logout invalidates the session. Laravel UI web auth and password reset routes remain available separately.
+The React auth page at `/account` first requests `/api/user`; the expected unauthenticated response displays sign-in. Registration and login obtain the Sanctum CSRF cookie before submitting. Logout invalidates the session. Laravel UI web auth and password reset routes remain available separately.
 
 ## Existing Web Flow
 
@@ -50,4 +68,4 @@ flowchart TD
 
 Admin route mounts require an authenticated admin. Guests are redirected to login, and authenticated non-admins receive 403. Registration cannot set admin status. Vendors are managed as records and never sign in. Category deletion is rejected while products or discount rules reference the category. The discount test panel resolves the selected product/vendor's active offer and runs the engine without writing any data.
 
-Public product browsing, cart, buyer ordering, and vendor notifications remain unimplemented; see [product requirements](requirements.md).
+Public product browsing and the guest cart are implemented (see the storefront flow above). Buyer ordering, checkout, and vendor notifications remain unimplemented; see [product requirements](requirements.md).

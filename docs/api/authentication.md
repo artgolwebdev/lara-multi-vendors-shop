@@ -1,6 +1,6 @@
 # Web Authentication
 
-The React client at `/` uses Laravel Sanctum's stateful SPA authentication with the existing `web` session guard. `POST /api/register` and `POST /api/login` establish a session; `POST /api/logout` invalidates it; `GET /api/user` returns the authenticated user's public fields. Register and login require the Sanctum CSRF cookie and are throttled. Axios sends same-origin credentials and the XSRF token.
+The React client at `/account` uses Laravel Sanctum's stateful SPA authentication with the existing `web` session guard. `POST /api/register` and `POST /api/login` establish a session; `POST /api/logout` invalidates it; `GET /api/user` returns the authenticated user's public fields. Register and login require the Sanctum CSRF cookie and are throttled. Axios sends same-origin credentials and the XSRF token.
 
 Laravel UI's `Auth::routes()` remains enabled for web login, registration, logout, and password reset/confirmation. The authenticated `/home` route remains protected by `HomeController`'s `auth` middleware.
 

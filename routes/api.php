@@ -8,10 +8,19 @@ use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\ProductImageController;
 use App\Http\Controllers\Api\Admin\VendorController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CartQuoteController;
+use App\Http\Controllers\Api\CategoryController as PublicCategoryController;
+use App\Http\Controllers\Api\ProductController as PublicProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
+
+Route::get('/products', [PublicProductController::class, 'index'])->name('api.products.index');
+Route::get('/products/{product}', [PublicProductController::class, 'show'])->name('api.products.show');
+Route::get('/categories', [PublicCategoryController::class, 'index'])->name('api.categories.index');
+Route::get('/categories/{category}', [PublicCategoryController::class, 'show'])->name('api.categories.show');
+Route::post('/cart/quote', CartQuoteController::class)->name('api.cart.quote');
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/user', [AuthController::class, 'user']);

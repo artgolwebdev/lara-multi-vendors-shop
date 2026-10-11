@@ -4,7 +4,13 @@ Verified with `php artisan route:list --except-vendor` and `php artisan route:li
 
 | Method | URI | Name / handler |
 | --- | --- | --- |
-| `GET|HEAD` | `/` | Closure returning `auth-app` (React mount) |
+| `GET|HEAD` | `/` | `store.home`, React storefront mount (`store-app`) |
+| `GET|HEAD` | `/shop` | `store.shop`, React storefront mount (`store-app`) |
+| `GET|HEAD` | `/categories` | `store.categories`, React storefront mount (`store-app`) |
+| `GET|HEAD` | `/categories/{category}` | `store.category`, React storefront mount (`store-app`) |
+| `GET|HEAD` | `/products/{product}` | `store.product`, React storefront mount (`store-app`) |
+| `GET|HEAD` | `/cart` | `store.cart`, React storefront mount (`store-app`) |
+| `GET|HEAD` | `/account` | `account`, React auth mount (`auth-app`) |
 | `GET|HEAD` | `/home` | `home`, `HomeController@index` (authenticated) |
 | `GET|HEAD` | `/admin` | `admin.dashboard`, React admin dashboard mount (`auth`, admin) |
 | `GET|HEAD` | `/admin/vendors` | React vendor list mount (`auth`, admin) |
@@ -55,5 +61,10 @@ These are web routes, not a REST API. For auth context see [authentication](auth
 | `PATCH` | `/api/admin/discount-rules/{discountRule}/status` | Admin session | Set or toggle a rule's active status |
 | `GET|POST` | `/api/admin/discount-rules` | Admin session | Discount-rule index/create |
 | `GET|PUT|PATCH|DELETE` | `/api/admin/discount-rules/{discountRule}` | Admin session | Discount-rule show/update/soft delete |
+| `GET` | `/api/products` | Public | `Api\ProductController@index` (search/category/sort/per_page) |
+| `GET` | `/api/products/{product}` | Public | `Api\ProductController@show` |
+| `GET` | `/api/categories` | Public | `Api\CategoryController@index` (active-product counts) |
+| `GET` | `/api/categories/{category}` | Public | `Api\CategoryController@show` |
+| `POST` | `/api/cart/quote` | Public | `Api\CartQuoteController` (stateless price quote) |
 
-Admin web routes redirect guests to login and return 403 to non-admin users; admin APIs return 401 to guests and 403 to non-admins. Sanctum also registers `GET /sanctum/csrf-cookie` for CSRF cookie initialization. Public catalog, order, or payment endpoints are not implemented.
+Admin web routes redirect guests to login and return 403 to non-admin users; admin APIs return 401 to guests and 403 to non-admins. Sanctum also registers `GET /sanctum/csrf-cookie` for CSRF cookie initialization. Public catalog and cart-quote endpoints are implemented; order, checkout, and payment endpoints are not.
