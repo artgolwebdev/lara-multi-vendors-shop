@@ -9,7 +9,7 @@ Last verified: 2026-10-11.
 - Laravel Boost: 2.10.3 (`^2.10`), configured for Laravel Boost MCP.
 - Laravel Sanctum: 4.3.3 (`^4.0`), added for stateful SPA/API authentication.
 - Database: Boost's active connection reports MySQL. `config/database.php` and `.env.example` default to SQLite; runtime selection depends on environment.
-- Frontend installed versions: Vite 8.3.4, Laravel Vite plugin 3.2.0, React/React DOM 18.3.1, React Router DOM 6.30.6, React Redux 9.3.0, Redux Toolkit 2.13.0, Bootstrap 5.3.8, Tailwind CSS and its Vite plugin 4.3.3, Sass 1.105.1, Axios 1.20.0, and Vite React plugin 6.1.2.
+- Frontend installed versions: Vite 8.3.4, Laravel Vite plugin 3.2.0, React/React DOM 18.3.1, React Router DOM 7.18.4, React Redux 9.3.0, Redux Toolkit 2.13.0, Bootstrap 5.3.8, Tailwind CSS and its Vite plugin 4.3.3, Sass 1.105.1, Axios 1.20.0, and Vite React plugin 6.1.2. Local Node/npm are 24.15.0/12.0.2; the deployment package declares Node 22.x.
 
 ## Implemented Application
 
@@ -43,6 +43,6 @@ Last verified: 2026-10-11.
 - Initial Vercel community PHP runtime configuration and a Laravel serverless entry point are present under Plan 012. Read-only requests to the provided Preview's `/up` and `/api/categories` returned HTTP 200 with HTML; `/api/categories` should return JSON. This does not verify Laravel health or Aiven connectivity; the cause is unknown.
 - Production database target is Aiven MySQL; the project owner reports adding its environment variables to Vercel and identified `storage/certs/ca.pem` as the Aiven CA bundle. The Vercel entry point now uses this bundle by default. Local PHP OpenSSL parses it, marks it `CA:TRUE`, and reports it currently valid; whether it is the active Aiven CA, trusts the service certificate, and works from Vercel remains unverified. Environment names, service region, live connectivity, migration state, and production data state also remain unverified.
 - Product images still use the local public disk. They are not durable on Vercel; do not rely on admin image uploads in production until persistent object storage is selected and configured.
-- See [Vercel deployment preparation](../development/deployment-vercel.md), [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md), and [Plan 013: Aiven MySQL TLS investigation](../plans/013-aiven-mysql-ssl-investigation-plan.md).
+- See [Vercel deployment preparation](../development/deployment-vercel.md), [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md), [Plan 013: Aiven MySQL TLS investigation](../plans/013-aiven-mysql-ssl-investigation-plan.md), and [Plan 014: Vercel deployment investigation](../plans/014-vercel-deployment-investigation-plan.md).
 
 See [known issues and unknowns](known-issues.md), [changelog](changelog.md), [the initial plan](../plans/001-project-foundation.md), and [Step 1 authentication plan](../plans/002-react-api-auth.md).

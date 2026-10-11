@@ -2,7 +2,7 @@
 
 ## Current status
 
-Plan 012 adds an initial Vercel PHP entry point and build configuration for the Laravel/React application. Read-only requests to the provided Preview's `/up` and `/api/categories` both returned HTTP 200 with HTML; the latter should return JSON. This does not verify Laravel health or Aiven connectivity, and the cause is unknown. See [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md) and [Plan 013](../plans/013-aiven-mysql-ssl-investigation-plan.md) for the investigation and remaining work.
+Plan 012 adds an initial Vercel PHP entry point and build configuration for the Laravel/React application. Read-only requests to the provided Preview's `/up` and `/api/categories` both returned HTTP 200 with HTML; the latter should return JSON. This does not verify Laravel health or Aiven connectivity, and the cause is unknown. See [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md), [Plan 013](../plans/013-aiven-mysql-ssl-investigation-plan.md), and [Plan 014](../plans/014-vercel-deployment-investigation-plan.md) for the investigation and remaining work.
 
 Production is intended to use Aiven MySQL. The project owner reports that Aiven connection variables have been added to the Vercel project. Confirm that Vercel Production variables map to Laravel's `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`. Do not copy secret values into this repository.
 

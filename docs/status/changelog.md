@@ -2,6 +2,7 @@
 
 ## 2026-10-11
 
+- Added proposed Plan 014 for investigating Vercel Preview HTML responses and completing the Laravel 13/React/Vite/Aiven deployment review. Corrected the recorded React Router DOM version to 7.18.4 from the installed package tree.
 - Continued Plan 013: completed the local configuration/runtime prerequisite audit. XAMPP PHP 8.4.23 has `pdo_mysql`, OpenSSL, and the PDO MySQL verification option; the Aiven CA parses, is marked as a CA, and is within its current validity window. Vercel build/runtime and live Aiven verification remain outstanding.
 - Checked the user-provided Vercel Preview's `/up` endpoint with a read-only HTTPS GET; it returned HTTP 200 with HTML, so no Laravel health or database result was established.
 - With the user's approval for read-only access to the demo's Aiven Production database, requested the public `/api/categories` endpoint. It returned HTTP 200 with HTML instead of JSON, so database connectivity remains unverified; no write, migration, or seed request was made.

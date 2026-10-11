@@ -14,6 +14,7 @@ This file separates verified implementation limits from questions. It does not c
 - Discount stacking applies every matching rule cumulatively per line (capped at the line subtotal).
 - No production deployment has been completed and no CI/CD deployment automation is configured.
 - Initial Vercel runtime scaffolding now exists, but deployment and Aiven MySQL connectivity are unverified. Product image uploads still use local storage and are not durable on Vercel; persistent object storage must be selected before production image uploads are enabled. See [Vercel deployment preparation](../development/deployment-vercel.md) and [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md).
+- The provided Vercel Preview returned HTTP 200 with HTML for `/up` and `/api/categories`; the latter is expected to return JSON. This does not prove Laravel or Aiven health. The source of the response (deployment protection, static output, routing, or function behavior) is unresolved; see [Plan 014](../plans/014-vercel-deployment-investigation-plan.md).
 - Email verification files and a user timestamp column exist, but no verification routes appeared in the inspected route list.
 
 ## Open Questions

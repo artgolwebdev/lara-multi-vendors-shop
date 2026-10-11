@@ -17,3 +17,4 @@ This index contains only identified work. There is no confirmed feature roadmap 
 | `011-mobile-ux-persistent-header` | Improve responsive UX/UI and keep the storefront header visible while scrolling | in_progress | [Plan 011](011-mobile-ux-and-persistent-header-plan.md) |
 | `012-vercel-aiven-production-deployment` | Prepare Laravel production deployment on Vercel with Aiven MySQL | in_progress | [Plan 012](012-vercel-aiven-production-deployment-plan.md) |
 | `013-aiven-mysql-ssl-investigation` | Audit and validate Aiven MySQL TLS configuration for Laravel on Vercel | in_progress | [Plan 013](013-aiven-mysql-ssl-investigation-plan.md) |
+| `014-vercel-deployment-investigation` | Investigate Preview HTML responses and plan a verified Laravel/Vite/Aiven Vercel deployment | proposed | [Plan 014](014-vercel-deployment-investigation-plan.md) |
