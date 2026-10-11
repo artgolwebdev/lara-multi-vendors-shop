@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AdminCatalogSeeder::class,
             DiscountRuleSeeder::class,
             CustomerSeeder::class,
+            DemoOrderSeeder::class,
         ]);
     }
 }

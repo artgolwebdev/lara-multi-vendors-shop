@@ -73,9 +73,4 @@ class AccountController extends Controller
 
         return response()->json(['data' => $eligible->values()]);
     }
-
-    public function orders(): JsonResponse
-    {
-        return response()->json(['data' => []]);
-    }
 }

@@ -103,9 +103,9 @@ export default function CartPage() {
                             </div>
                         </dl>
 
-                        <button className="store-button store-button-block" type="button" disabled>
-                            Checkout coming soon
-                        </button>
+                        <Link to="/checkout" className="store-button store-button-block">
+                            Proceed to checkout
+                        </Link>
                     </aside>
                 )}
             </div>

@@ -27,6 +27,14 @@ Route::get('/cart', function () {
     return view('store-app');
 })->name('store.cart');
 
+Route::get('/checkout', function () {
+    return view('store-app');
+})->name('store.checkout');
+
+Route::get('/order-confirmation/{order}', function () {
+    return view('store-app');
+})->name('store.order-confirmation');
+
 Route::get('/account', function () {
     return view('auth-app');
 })->name('account');
@@ -52,4 +60,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::view('/products/{product}/edit', 'admin-app')->name('products.edit');
     Route::view('/customers', 'admin-app')->name('customers.index');
     Route::view('/customers/{customer}', 'admin-app')->name('customers.show');
+    Route::view('/orders', 'admin-app')->name('orders.index');
+    Route::view('/orders/{order}', 'admin-app')->name('orders.show');
 });

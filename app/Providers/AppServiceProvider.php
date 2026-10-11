@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Services\Discounts\CategoryDiscountRule;
 use App\Services\Discounts\Contracts\CustomerOrderHistory;
 use App\Services\Discounts\DiscountEngine;
-use App\Services\Discounts\Implementations\DefaultCustomerOrderHistory;
+use App\Services\Discounts\Implementations\DatabaseCustomerOrderHistory;
 use App\Services\Discounts\LoyaltyCustomerDiscountRule;
 use App\Services\Discounts\QuantityDiscountRule;
 use Illuminate\Contracts\Foundation\Application;
@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(CustomerOrderHistory::class, DefaultCustomerOrderHistory::class);
+        $this->app->bind(CustomerOrderHistory::class, DatabaseCustomerOrderHistory::class);
 
         $this->app->tag([
             QuantityDiscountRule::class,

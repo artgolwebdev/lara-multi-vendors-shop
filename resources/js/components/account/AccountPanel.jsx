@@ -159,7 +159,17 @@ export default function AccountPanel({ user, onUserChange, onLogout }) {
                 <h3>My orders</h3>
                 {orders?.length > 0 ? (
                     <ul className="account-orders">
-                        {orders.map((order) => <li key={order.id}>{order.reference}</li>)}
+                        {orders.map((order) => (
+                            <li key={order.id}>
+                                <div>
+                                    <strong>{order.order_number}</strong>
+                                    <span>{new Date(order.placed_at).toLocaleDateString()}</span>
+                                </div>
+                                <span>{order.status}</span>
+                                <span>{order.sub_orders_count ?? order.sub_orders?.length ?? 0} vendors</span>
+                                <strong>${order.total}</strong>
+                            </li>
+                        ))}
                     </ul>
                 ) : (
                     <p className="account-empty">Your order history will appear here once ordering is available.</p>
