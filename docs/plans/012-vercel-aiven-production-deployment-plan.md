@@ -153,7 +153,7 @@ The deployment must build and serve the React/Vite assets, persist sessions and 
 | Aiven CA PEM syntax | PHP OpenSSL can parse the provided certificate file | Passed locally with `openssl_x509_read`; trust/rotation and live connection are not verified |
 | Staging Aiven TLS/database connectivity | Laravel can connect and query using the CA and configured variables | Not run; credentials are in Vercel and were not inspected |
 | MySQL migrations on disposable/staging Aiven database | All pending migrations apply without data reset or seeding | Not run; no migration was run |
-| Vercel preview smoke checks | Health, pages, APIs, auth, assets, and uploads work | Not run; implementation in progress |
+| Vercel preview smoke checks | Health, pages, APIs, auth, assets, and uploads work | Read-only GETs to `/up` and `/api/categories` returned HTTP 200 with `text/html`; the catalog endpoint should return JSON, so these responses do not verify Laravel health or database connectivity. Runtime details, assets, auth, and uploads remain unchecked |
 | Production deployment smoke checks | Production hostname and Aiven-backed flows work | Not run; implementation in progress |
 
 ## Risks, Dependencies, and Open Questions
@@ -179,4 +179,4 @@ The deployment must build and serve the React/Vite assets, persist sessions and 
 
 ## Final Summary and Remaining Work
 
-Initial deployment scaffolding is implemented, but Plan 012 remains in progress. Vercel deployment, Aiven TLS connectivity, migrations, production database state, and region choice are not verified. The object-storage provider is intentionally deferred by the user; local function disk must not be considered persistent. Remaining Vercel environment, preview-auth, mail, and plan details are also unconfirmed.
+Initial deployment scaffolding is implemented, but Plan 012 remains in progress. The provided Preview returned HTML for both `/up` and the JSON `/api/categories` endpoint; the reason is unknown, and this does not verify Laravel health or Aiven connectivity. Vercel runtime/build details, Aiven TLS, migrations, production database state, and region choice are not verified. The object-storage provider is intentionally deferred by the user; local function disk must not be considered persistent. Remaining Vercel environment, preview-auth, mail, and plan details are also unconfirmed.

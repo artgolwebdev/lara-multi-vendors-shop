@@ -1,7 +1,7 @@
 # 013: Aiven MySQL SSL Integration Investigation
 
 - ID: `013-aiven-mysql-ssl-investigation`
-- Status: proposed
+- Status: in_progress
 - Created: 2026-10-11
 - Updated: 2026-10-11
 - Completed: not completed
@@ -43,7 +43,7 @@ The application is prepared to use Aiven MySQL from Vercel, but no connection fr
 - Local PHP reports `pdo_mysql` and `openssl` loaded, and exposes `PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT`.
 - The `mysql` connection in `config/database.php` uses Laravel's `DB_*`/`DB_URL` settings. When `pdo_mysql` is loaded, it supplies `Pdo\Mysql::ATTR_SSL_CA` from `MYSQL_ATTR_SSL_CA` and sets `Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT` to `true`. The default connection remains SQLite unless `DB_CONNECTION` selects MySQL.
 - `api/index.php` configures `MYSQL_ATTR_SSL_CA` before loading Laravel. Precedence is non-empty `AIVEN_CA_PEM_B64` written to `/tmp`, then a configured `MYSQL_ATTR_SSL_CA` path, then `storage/certs/ca.pem`. On Vercel it returns an error if no certificate path resolves. It does not print the certificate or database credentials.
-- `storage/certs/ca.pem` exists and is readable in the checked-out repository. PHP OpenSSL successfully parsed it as a certificate. This confirms PEM syntax only; no CA-chain trust or Aiven server identity was established by that check.
+- `storage/certs/ca.pem` exists and is readable in the checked-out repository. PHP OpenSSL parses it as a certificate, reports `CA:TRUE`, and says it is currently within its validity period according to the local system clock. This does not establish that it is the current Aiven project CA, that it chains to the Aiven server certificate, or that the server hostname is verified.
 - `.vercelignore` excludes local mutable storage directories but does not exclude `storage/certs/ca.pem`. The file was included in commit `4674fae`, so it is present in the current Git deployment source. Confirm the actual Vercel artifact during Preview.
 - `.gitignore` does not ignore `storage/certs/ca.pem`. The certificate is public trust material, but must be refreshed when Aiven rotates the project CA. Never commit private keys or credentials beside it.
 - `composer.json` has a `vercel` build script for package discovery, `npm ci`, and `npm run build`; it does not currently run `config:cache`. Do not introduce build-time caching of Production secrets. Verify Vercel build settings and artifact behavior directly.
@@ -143,7 +143,7 @@ The entry point's CA precedence is `AIVEN_CA_PEM_B64`, then a resolvable `MYSQL_
 
 The audit tasks below are read-only. Any code correction discovered during the audit must be proposed in a follow-up implementation change and must not be applied as part of the read-only audit.
 
-- [ ] **013.1 — Verify local config and certificate facts.** Files: `config/database.php`, `api/index.php`, `storage/certs/ca.pem`, `.gitignore`, `.vercelignore`. Required: inspect driver defaults, PDO option availability, CA path precedence and artifact rules; run format/readability checks without displaying certificate contents. Depends on: none. Verification: `composer show --direct`; `php -v`; `php -m`; `php -r` checks for `pdo_mysql`, OpenSSL parse, and PDO SSL option. Completion: findings recorded with PEM parsing distinguished from CA trust.
+- [x] **013.1 — Verify local config and certificate facts.** Files: `config/database.php`, `api/index.php`, `storage/certs/ca.pem`, `.gitignore`, `.vercelignore`. Required: inspect driver defaults, PDO option availability, CA path precedence and artifact rules; run format/readability checks without displaying certificate contents. Depends on: none. Verification: `composer show --direct`; `composer check-platform-reqs`; `php -v`; `php -m`; PHP OpenSSL parse, CA basic-constraints, and current-validity checks; PDO SSL option check. Completion: findings recorded with PEM parsing distinguished from CA trust.
 - [ ] **013.2 — Verify Vercel runtime and build compatibility.** Files: `vercel.json`, `composer.json`, `composer.lock`, `package.json`, `package-lock.json`. Required: compare configured runtime, PHP requirements, extensions, Node version, Composer scripts, and deployment bundle with current runtime documentation; run the build in a Preview or equivalent without Production secrets. Depends on 013.1. Verification: Vercel build logs and sanitized artifact-size/runtime details. Completion: Laravel boots under the deployed PHP runtime and required extensions are present, or a concrete incompatibility is documented.
 - [ ] **013.3 — Confirm Aiven and Vercel environment/network settings.** Files: no repository files unless documentation needs a sanitized update. Required: inspect variable names and environment scopes in dashboards without copying values; confirm Aiven service state, database, endpoint/port, access controls, user grants, and selected regions. Depends on 013.2. Verification: dashboard review and approved read-only connectivity check. Completion: safe Preview-to-Aiven access is confirmed, or the exact external blocker and owner action are recorded.
 - [ ] **013.4 — Prove TLS verification in Preview.** Files: `api/index.php`, `config/database.php`, `docs/development/deployment-vercel.md` only if a verified correction or result needs recording. Required: use the bundled/current CA; make one read-only PDO/Laravel query; confirm verification rejects an invalid CA or hostname where the driver supports that test. Never disable verification. Depends on 013.1–013.3. Verification: sanitized Preview function logs and read-only query result. Completion: deployed request connects to the intended Aiven host with TLS verification enabled and no secret values in logs.
@@ -168,8 +168,9 @@ The audit tasks below are read-only. Any code correction discovered during the a
 | --- | --- | --- |
 | Installed dependency and PHP version inspection | Confirm Laravel/PHP constraints and current local versions | PHP 8.4.23; Laravel 13.35.0; `composer show --direct` completed |
 | Local PDO/OpenSSL capabilities | PDO MySQL, OpenSSL, and server-certificate option are available | `pdo_mysql`, `openssl`, and `PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT` reported present |
-| CA file check | File is readable and parses as a PEM certificate without printing contents | Readable; PHP OpenSSL parse passed. CA trust, expiry, and server identity were not established in this audit |
+| CA file check | File is readable, parses as PEM, is marked as a CA, and is within its validity window without printing contents | Readable; PHP OpenSSL parse passed; `CA:TRUE` and current validity reported. Chain trust and Aiven server identity remain unverified |
 | Runtime documentation review | Identify expected PHP version and extensions | `vercel-php@0.9.0` documentation lists PHP 8.5.x and PDO MySQL/OpenSSL; repository build not run here |
+| Preview endpoint routing | Confirm Preview's Laravel health and JSON catalog endpoints are served by the function | Read-only GETs to `/up` and `/api/categories` returned HTTP 200 with `text/html`; `/api/categories` should be JSON. The cause is unknown, so Laravel routing and DB connectivity are unverified |
 | Deployed Vercel build and boot | Laravel boots with supported PHP/extensions and the CA included | Not run |
 | Preview Aiven TLS/read query | Verified TLS connection and minimal read-only query succeed | Not run; Vercel/Aiven dashboards and secrets were not accessed |
 | Invalid-CA negative check | Certificate verification rejects an untrusted CA | Not run |
@@ -196,7 +197,11 @@ The audit tasks below are read-only. Any code correction discovered during the a
 ## Implementation Notes and Discoveries
 
 - The Vercel/Aiven scaffolding and CA file were committed to `main` in `4674fae` before this audit plan was added.
-- The local PEM check established parseability only. No Aiven credentials, connection URI, cert contents, remote dashboard, database, or Vercel deployment were inspected.
+- Completed local audit task 013.1. `composer check-platform-reqs` passes in the PHP 8.4.23 XAMPP environment; `pdo_mysql`, OpenSSL, and the PDO MySQL server-verification option are present. The CA parses, is marked `CA:TRUE`, and is currently within its validity window locally.
+- The user provided a Vercel Preview URL and authorized a read-only request. The `/up` and `/api/categories` GETs returned HTTP 200 with HTML; this is not evidence that the intended Laravel routes ran.
+- The user reports that the demo's Vercel Production deployment uses the Aiven Production database. Whether the supplied Preview uses the same environment/database is unconfirmed. The `/api/categories` response was `text/html` (332,297 bytes), not the expected JSON, so no Aiven connectivity result was established. Preview protection or routing behavior must be investigated without assuming which caused it. No write, migration, or seed request was made.
+- Vercel dashboard variables/scopes, build logs, and the function artifact remain uninspected. Do not run more database requests until the Preview API routing/response is understood.
+- No Aiven credentials, connection URI, certificate contents, remote dashboard, database, or Vercel deployment were inspected. The local CA checks do not establish Aiven trust or connectivity.
 - Aiven's current PHP/PDO guide demonstrates certificate verification with `sslmode=verify-ca` and a CA path. Compare the effective `Pdo\Mysql` options in the exact Vercel runtime against the Aiven service's current connection instructions during task 013.4.
 - Aiven can rotate project CA certificates. Maintain a documented refresh/redeployment step and verify the replacement CA before the old CA is retired.
 - Vercel's documented function filesystem is read-only except for temporary `/tmp` storage; the runtime's bundle size and duration limits must be evaluated for the actual project deployment.

@@ -40,8 +40,8 @@ Last verified: 2026-10-11.
 
 ## Deployment Preparation
 
-- Initial Vercel community PHP runtime configuration and a Laravel serverless entry point are present under Plan 012. This configuration has not been deployed or verified against Vercel or the user's Aiven service.
-- Production database target is Aiven MySQL; the project owner reports adding its environment variables to Vercel and identified `storage/certs/ca.pem` as the Aiven CA bundle. The Vercel entry point now uses this bundle by default; local PHP OpenSSL can parse it, but environment names, certificate trust/rotation, service region, live connectivity, migration state, and production data state remain unverified.
+- Initial Vercel community PHP runtime configuration and a Laravel serverless entry point are present under Plan 012. Read-only requests to the provided Preview's `/up` and `/api/categories` returned HTTP 200 with HTML; `/api/categories` should return JSON. This does not verify Laravel health or Aiven connectivity; the cause is unknown.
+- Production database target is Aiven MySQL; the project owner reports adding its environment variables to Vercel and identified `storage/certs/ca.pem` as the Aiven CA bundle. The Vercel entry point now uses this bundle by default. Local PHP OpenSSL parses it, marks it `CA:TRUE`, and reports it currently valid; whether it is the active Aiven CA, trusts the service certificate, and works from Vercel remains unverified. Environment names, service region, live connectivity, migration state, and production data state also remain unverified.
 - Product images still use the local public disk. They are not durable on Vercel; do not rely on admin image uploads in production until persistent object storage is selected and configured.
 - See [Vercel deployment preparation](../development/deployment-vercel.md), [Plan 012](../plans/012-vercel-aiven-production-deployment-plan.md), and [Plan 013: Aiven MySQL TLS investigation](../plans/013-aiven-mysql-ssl-investigation-plan.md).
 

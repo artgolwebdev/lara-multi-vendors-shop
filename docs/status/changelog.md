@@ -2,6 +2,9 @@
 
 ## 2026-10-11
 
+- Continued Plan 013: completed the local configuration/runtime prerequisite audit. XAMPP PHP 8.4.23 has `pdo_mysql`, OpenSSL, and the PDO MySQL verification option; the Aiven CA parses, is marked as a CA, and is within its current validity window. Vercel build/runtime and live Aiven verification remain outstanding.
+- Checked the user-provided Vercel Preview's `/up` endpoint with a read-only HTTPS GET; it returned HTTP 200 with HTML, so no Laravel health or database result was established.
+- With the user's approval for read-only access to the demo's Aiven Production database, requested the public `/api/categories` endpoint. It returned HTTP 200 with HTML instead of JSON, so database connectivity remains unverified; no write, migration, or seed request was made.
 - Added proposed Plan 013 to audit and verify Aiven MySQL TLS from Laravel on Vercel. It records the current CA/PDO setup, local-only checks, unresolved remote access and trust questions, a safe preview test sequence, and migration/rollback safeguards.
 - Started Plan 012 with Vercel's community PHP runtime, a Laravel serverless entry point using `/tmp` for writable runtime paths, Vite build integration, MySQL TLS verification configuration, and deployment documentation. The owner reports Aiven MySQL credentials are in Vercel. Deployment, Aiven connectivity, migration procedure, and durable product-image storage remain unverified; local disk is temporary on Vercel.
 - Configured Plan 012's Vercel entry point to use the owner-provided `storage/certs/ca.pem` as the default Aiven CA path, while retaining environment overrides and failing closed when no CA file is available.
