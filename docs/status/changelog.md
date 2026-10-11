@@ -2,6 +2,7 @@
 
 ## 2026-10-11
 
+- Added proposed Plan 013 to audit and verify Aiven MySQL TLS from Laravel on Vercel. It records the current CA/PDO setup, local-only checks, unresolved remote access and trust questions, a safe preview test sequence, and migration/rollback safeguards.
 - Started Plan 012 with Vercel's community PHP runtime, a Laravel serverless entry point using `/tmp` for writable runtime paths, Vite build integration, MySQL TLS verification configuration, and deployment documentation. The owner reports Aiven MySQL credentials are in Vercel. Deployment, Aiven connectivity, migration procedure, and durable product-image storage remain unverified; local disk is temporary on Vercel.
 - Configured Plan 012's Vercel entry point to use the owner-provided `storage/certs/ca.pem` as the default Aiven CA path, while retaining environment overrides and failing closed when no CA file is available.
 - Verified that PHP OpenSSL parses the provided Aiven CA PEM; this format check does not establish CA trust or live connectivity.
