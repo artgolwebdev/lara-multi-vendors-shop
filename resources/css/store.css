@@ -598,22 +598,25 @@
 }
 
 .store-quantity button {
-    width: 38px;
-    height: 38px;
+    min-width: 44px;
+    min-height: 44px;
     border: 0;
     color: #25251f;
     background: transparent;
     font-size: 18px;
+    touch-action: manipulation;
+    cursor: pointer;
 }
 
 .store-quantity button:disabled {
     cursor: not-allowed;
     opacity: .35;
+    pointer-events: none;
 }
 
 .store-quantity input {
     width: 44px;
-    height: 38px;
+    height: 44px;
     border: 0;
     border-right: 1px solid #deddd5;
     border-left: 1px solid #deddd5;
@@ -991,14 +994,29 @@
         grid-template-columns: 78px minmax(0, 1fr);
         grid-template-areas:
             'media info'
-            'qty total';
-        row-gap: 14px;
+            'qty   qty'
+            'total total';
+        row-gap: 10px;
     }
 
     .store-cart-media { grid-area: media; }
-    .store-cart-info { grid-area: info; }
-    .store-cart-qty { grid-area: qty; align-items: flex-start; }
-    .store-cart-total { grid-area: total; }
+    .store-cart-info  { grid-area: info; }
+
+    /* qty spans full width — gives QuantityControl (120px) room to breathe */
+    .store-cart-qty {
+        grid-area: qty;
+        align-items: flex-start;
+    }
+
+    /* total spans full width below qty, right-aligned */
+    .store-cart-total {
+        grid-area: total;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

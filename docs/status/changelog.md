@@ -1,6 +1,11 @@
 # Documentation Changelog
 
+## 2026-10-12
+
+- Implemented Plan 018: fixed the cart "+" button being unresponsive on mobile devices (320–390 px). Root causes were (1) the `@media (max-width: 620px)` grid placing `.store-cart-qty` and `.store-cart-total` side by side in a 78 px column while `QuantityControl` is 120 px wide, causing the "+" button to overflow and be covered by `.store-cart-total`; (2) `.store-quantity button` touch target was 38 × 38 px, below the 44 px minimum; (3) no `touch-action: manipulation` on the buttons, leaving a 300 ms tap delay on mobile. Fixed by making `qty` and `total` each span the full row width in the mobile grid, increasing button size to `min-width/min-height: 44px`, and adding `touch-action: manipulation`. CSS-only change; no JSX, backend, or API files touched. `npm run build` passed (exit 0). See [Plan 018](../plans/018-cart-plus-button-mobile-bug-fix.md).
+
 ## 2026-10-11
+
 
 - Reproduced the Production API 404 behavior through the local Vercel PHP entry point. Found Symfony was treating `/api` as Laravel's base URL because the script server variables described `api/index.php`. Updated `api/index.php` to present `public/index.php` as the Laravel front controller. Local smoke checks now return 401 for unauthenticated `/api/user`, 422 for invalid catalog query parameters, route/database errors rather than 404 for catalog GETs, and 200 for the built JS asset. Focused auth/catalog tests (12 tests, 68 assertions), PHP lint, and Pint pass. Preview/Production verification remains pending.
 - Updated Plan 017, Plan 016, deployment guidance, current state, known issues, and backlog with the reproduced root cause and local correction. Local catalog HTTP requests currently fail at MySQL (`server has gone away`), so Aiven/data response health remains a separate unresolved check.

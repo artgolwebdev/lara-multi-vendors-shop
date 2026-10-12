@@ -1,6 +1,6 @@
 # Current State
 
-Last verified: 2026-10-11.
+Last verified: 2026-10-12.
 
 ## Runtime and Dependencies
 
@@ -27,6 +27,7 @@ Last verified: 2026-10-11.
 - Design tokens (`resources/css/tokens.css`) and shared UI primitives (`resources/js/components/ui/`, `resources/css/ui.css`) powering checkout, confirmation, and admin order workflows without external component libraries.
 - Blade and React/Vite frontend with Bootstrap/Sass and Tailwind/Vite assets. React Router and Redux Toolkit power the storefront SPA; there is no Inertia or Livewire.
 - Storefront masthead is sticky across store routes; on screens at or below 900px, navigation, search, and account links are grouped in a keyboard-operable menu disclosure.
+- Cart quantity controls on mobile (≤ 620 px) have been fixed: the `+` button is no longer covered by `.store-cart-total` (grid area now spans full width), touch targets are ≥ 44 × 44 px, and `touch-action: manipulation` eliminates the 300 ms tap delay. See [Plan 018](../plans/018-cart-plus-button-mobile-bug-fix.md).
 - PHPUnit: 150 tests and 694 assertions pass, covering admin authorization, vendor/product/category/discount CRUD, audience normalization and selected-customer pivot synchronization, upload validation, offer sync and lowest price, discount rule matching/stacking/rounding (including welcome loyalty plus quantity stacking through checkout and repeat-order eligibility), engine tag resolution, registration privilege boundaries, customer account access control, admin customer management and loyalty grant/revoke, the public storefront listing/detail/category APIs, the cart-quote endpoint, order checkout, COD placement, 409 price guards, guest token and owner order read access, storefront/auth SPA page mounts, intended auth redirects, remember-cookie login, password recovery page, and cart-quoter/hint-resolver unit behavior.
 - The Sanctum, plan-004, plan-006, and plan-007 migrations (`users` phone/address, `discount_rules` loyalty fields, `discount_rule_user` pivot, `orders`, `sub_orders`, `order_items`) have been applied to the configured database.
 - `php artisan migrate:fresh --seed` was verified on a disposable in-memory SQLite database; the configured database was migrated forward without a reset.
