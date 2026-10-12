@@ -23,3 +23,4 @@ This index contains only identified work. There is no confirmed feature roadmap 
 | `017-fix-production-api-404s` | Diagnose and fix Production 404s from Laravel API requests on Vercel | in_progress | [Plan 017](017-fix-production-api-404s-plan.md) |
 | `018-cart-plus-button-mobile-bug` | Fix cart "+" button unresponsive on mobile devices (320–390 px) | completed | [Plan 018](018-cart-plus-button-mobile-bug-fix.md) |
 | `019-fix-product-update-images-validation` | Fix "images field must be an array" on product edit; disable edit-mode image upload | completed | [Plan 019](019-fix-product-update-images-validation.md) |
+| `020-image-input-disabled-in-product-form` | Keep the images file input visible in both product forms, disabled for now | ready | [Plan 020](020-keep-image-input-disabled-in-product-form.md) |

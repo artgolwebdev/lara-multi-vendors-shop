@@ -224,18 +224,12 @@ function ProductForm({ productId }) {
                     ))}
                 </section>
 
-                <section className="admin-form-section">
+                <section className="admin-form-section disabled">
                     <h2>Product images</h2>
                     {images.length > 0 && <div className="admin-image-grid">{images.map((image) => <figure className="admin-image-item" key={image.id}><img src={image.url} alt="Product" /><figcaption>{image.is_primary ? 'Primary image' : 'Product image'}<button type="button" onClick={() => deleteImage(image)}>Remove</button></figcaption></figure>)}</div>}
-                    {productId ? (
-                        <p className="admin-muted">Adding images while editing is disabled. Images can be uploaded when creating the product.</p>
-                    ) : (
-                        <>
-                            <label className="admin-field">Add images<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => setSelectedImages(Array.from(event.target.files || []))} /></label>
-                            {selectedImages.length > 0 && <p className="admin-muted">{selectedImages.map((image) => image.name).join(', ')}</p>}
-                            <p className="admin-help">JPEG, PNG, or WebP. Maximum 2 MB per image, up to 10 per save.</p>
-                        </>
-                    )}
+                        <label className="admin-field">Add images<input type="file" accept="image/jpeg,image/png,image/webp" disabled="disabled" multiple onChange={(event) => setSelectedImages(Array.from(event.target.files || []))} /></label>
+                        {selectedImages.length > 0 && <p className="admin-muted">{selectedImages.map((image) => image.name).join(', ')}</p>}
+                        <p className="admin-help">JPEG, PNG, or WebP. Maximum 2 MB per image, up to 10 per save.</p>
                 </section>
 
                 <div className="admin-form-actions">
