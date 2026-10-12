@@ -35,7 +35,7 @@ class UpdateProductRequest extends FormRequest
             'offers.*.price' => ['required', 'numeric', 'gt:0'],
             'offers.*.vendor_sku' => ['nullable', 'string', 'max:100'],
             'offers.*.is_active' => ['sometimes', 'boolean'],
-            'images' => ['sometimes', 'array', 'max:10'],
+            'images' => ['nullable', 'array', 'max:10'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }

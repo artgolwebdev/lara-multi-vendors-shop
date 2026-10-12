@@ -213,6 +213,82 @@ class AdminCatalogTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_update_product_without_uploading_images(): void
+    {
+        $product = Product::factory()->create();
+        $vendor = Vendor::factory()->create();
+
+        // The React edit form sends multipart/form-data with images stringified as an
+        // empty value when no new files are selected; that must not trip validation.
+        $response = $this->actingAs($this->admin())->post("/api/admin/products/{$product->id}", [
+            '_method' => 'PUT',
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'sku' => $product->sku,
+            'category_id' => $product->category_id,
+            'quantity' => 42,
+            'is_active' => '1',
+            'offers' => [
+                ['vendor_id' => $vendor->id, 'price' => '11.00', 'is_active' => '1'],
+            ],
+            'images' => '',
+        ], ['Accept' => 'application/json']);
+
+        $response->assertOk()
+            ->assertJsonPath('data.quantity', 42)
+            ->assertJsonCount(0, 'data.images');
+
+        $this->assertDatabaseHas('products', ['id' => $product->id, 'quantity' => 42]);
+    }
+
+    public function test_admin_can_update_product_and_upload_new_images(): void
+    {
+        Storage::fake('public');
+        $product = Product::factory()->create();
+        $vendor = Vendor::factory()->create();
+
+        $response = $this->actingAs($this->admin())->post("/api/admin/products/{$product->id}", [
+            '_method' => 'PUT',
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'sku' => $product->sku,
+            'category_id' => $product->category_id,
+            'quantity' => $product->quantity,
+            'is_active' => '1',
+            'offers' => [
+                ['vendor_id' => $vendor->id, 'price' => '12.50', 'is_active' => '1'],
+            ],
+            'images' => [UploadedFile::fake()->image('new-front.jpg')],
+        ], ['Accept' => 'application/json']);
+
+        $response->assertOk()->assertJsonCount(1, 'data.images');
+
+        $image = $response->json('data.images.0');
+        Storage::disk('public')->assertExists($image['path']);
+    }
+
+    public function test_product_update_rejects_invalid_image_files(): void
+    {
+        $product = Product::factory()->create();
+        $vendor = Vendor::factory()->create();
+
+        $this->actingAs($this->admin())->post("/api/admin/products/{$product->id}", [
+            '_method' => 'PUT',
+            'name' => $product->name,
+            'slug' => $product->slug,
+            'sku' => $product->sku,
+            'category_id' => $product->category_id,
+            'quantity' => $product->quantity,
+            'is_active' => '1',
+            'offers' => [
+                ['vendor_id' => $vendor->id, 'price' => '10.00', 'is_active' => '1'],
+            ],
+            'images' => [UploadedFile::fake()->create('manual.pdf', 50, 'application/pdf')],
+        ], ['Accept' => 'application/json'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['images.0']);
+    }
+
     public function test_admin_can_soft_delete_product(): void
     {
         $product = Product::factory()->create();

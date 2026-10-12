@@ -22,3 +22,4 @@ This index contains only identified work. There is no confirmed feature roadmap 
 | `016-blank-production-storefront` | Fix the blank production storefront by verifying Vite asset output, routing, and browser/API behavior | in_progress | [Plan 016](016-fix-blank-production-storefront.md) |
 | `017-fix-production-api-404s` | Diagnose and fix Production 404s from Laravel API requests on Vercel | in_progress | [Plan 017](017-fix-production-api-404s-plan.md) |
 | `018-cart-plus-button-mobile-bug` | Fix cart "+" button unresponsive on mobile devices (320–390 px) | completed | [Plan 018](018-cart-plus-button-mobile-bug-fix.md) |
+| `019-fix-product-update-images-validation` | Fix "images field must be an array" on product edit; disable edit-mode image upload | completed | [Plan 019](019-fix-product-update-images-validation.md) |

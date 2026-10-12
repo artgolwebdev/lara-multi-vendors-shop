@@ -1,10 +1,10 @@
 # 019: Fix "images field must be an array" Error When Editing a Product
 
 - ID: `019-fix-product-update-images-validation`
-- Status: ready
+- Status: completed
 - Created: 2026-10-12
 - Updated: 2026-10-12
-- Completed: not completed
+- Completed: 2026-10-12
 
 ## Problem and Intended Outcome
 
@@ -22,12 +22,14 @@ No images are being uploaded in this case, yet the validation rejects the reques
 - Add a regression test confirming that a product can be updated without uploading any images.
 - Add a regression test confirming that a product can be updated while also uploading new images.
 - Run Pint and the full test suite.
+- **Added during implementation (user request):** disable the image upload control in the product **edit** form while keeping product creation and editing functional, because durable image storage is not available on Vercel yet.
+- **Added during implementation:** fix the product form submit loop, which stringified non-editable product payload fields (`images`, `offers`, `category`) back into the `FormData` body.
 
 ### Non-Goals
 
-- No changes to `StoreProductRequest` (create path); it does not exhibit this bug.
-- No changes to the product form JSX, routing, controller logic, or any other file unless the investigation reveals a secondary issue.
-- No new product features or UI changes.
+- No changes to `StoreProductRequest` rules other than the same proactive `nullable` consistency fix (applied as planned).
+- No changes to routing or controller logic.
+- No new product features or UI changes beyond disabling the edit-mode image upload control requested by the user.
 
 ## References
 
@@ -94,32 +96,39 @@ Not applicable. The change makes the `images` field more permissive only in the 
 
 ## Implementation Tasks
 
-- [ ] In `UpdateProductRequest::rules()`, change the `images` rule from `['sometimes', 'array', 'max:10']` to `['nullable', 'array', 'max:10']`.
-- [ ] Apply the same change to `StoreProductRequest::rules()` for consistency.
-- [ ] Add a regression test `test_admin_can_update_product_without_uploading_images` that sends a multipart `POST` (with `_method=PUT`) without any `images` field and asserts `200 OK`.
-- [ ] Add a regression test `test_admin_can_update_product_and_upload_new_images` that sends the same multipart request with new image files and asserts `200 OK` and the correct image count.
-- [ ] Run `php artisan test --compact tests/Feature/AdminCatalogTest.php` and confirm all tests pass.
-- [ ] Run `vendor/bin/pint --dirty --format agent` to format the changed PHP files.
-- [ ] Update `docs/plans/backlog.md`, `docs/status/current-state.md`, and `docs/status/changelog.md`.
-- [ ] Commit and push.
+- [x] In `UpdateProductRequest::rules()`, change the `images` rule from `['sometimes', 'array', 'max:10']` to `['nullable', 'array', 'max:10']`.
+- [x] Apply the same change to `StoreProductRequest::rules()` for consistency.
+- [x] Add a regression test `test_admin_can_update_product_without_uploading_images` that sends a multipart `POST` (with `_method=PUT`) without any `images` field and asserts `200 OK`.
+- [x] Add a regression test `test_admin_can_update_product_and_upload_new_images` that sends the same multipart request with new image files and asserts `200 OK` and the correct image count.
+- [x] Add `test_product_update_rejects_invalid_image_files` to keep the `422` behavior for invalid uploads on the update path (part of acceptance criteria).
+- [x] Fix `ProductForm.submit()` to skip payload keys not present in `emptyProduct`, so stringified `images`/`offers`/`category` objects are never submitted.
+- [x] Disable the image upload control in edit mode (`productId` set); create mode keeps the file input.
+- [x] Run `php artisan test --compact tests/Feature/AdminCatalogTest.php` and confirm all tests pass.
+- [x] Run `vendor/bin/pint --dirty --format agent` to format the changed PHP files.
+- [x] Update `docs/plans/backlog.md`, `docs/status/current-state.md`, and `docs/status/changelog.md`.
+- [x] Commit and push.
 
 ## Acceptance Criteria
 
-- [ ] Submitting the product edit form with no new images selected returns `200 OK` and updates the product.
-- [ ] Submitting the product edit form with new images selected returns `200 OK` and the images are stored.
-- [ ] Submitting an invalid image (wrong type or oversized) still returns `422` with the correct field error.
-- [ ] All existing `AdminCatalogTest` tests continue to pass.
-- [ ] `vendor/bin/pint --dirty` reports no formatting issues.
+- [x] Submitting the product edit form with no new images selected returns `200 OK` and updates the product.
+- [x] Submitting the product edit form with new images selected returns `200 OK` and the images are stored (API path; the edit UI now hides the upload control).
+- [x] Submitting an invalid image (wrong type or oversized) still returns `422` with the correct field error.
+- [x] All existing `AdminCatalogTest` tests continue to pass.
+- [x] `vendor/bin/pint --dirty` reports no formatting issues.
+- [x] Product creation still offers the image upload control and works unchanged.
+- [x] Product editing (name, slug, offers, quantity, etc.) works without any image field.
 
 ## Testing Strategy and Results
 
 | Check | Expected result | Actual result |
 | --- | --- | --- |
-| Update product without images (multipart) | 200 OK | Pending |
-| Update product with new images (multipart) | 200 OK, images stored | Pending |
-| Update product with invalid image | 422, `images.0` error | Pending |
-| Full `AdminCatalogTest` suite | All existing tests pass | Pending |
-| Pint formatting | No violations | Pending |
+| Update product without images (multipart, `images => ''`) | 200 OK | 200 OK (failed with 422 before the fix) |
+| Update product with new images (multipart) | 200 OK, images stored | 200 OK, image present on the fake `public` disk |
+| Update product with invalid image | 422, `images.0` error | 422, `images.0` error |
+| Full `AdminCatalogTest` suite | All existing tests pass | 14 passed (83 assertions) |
+| Full PHPUnit suite | All existing tests pass | 154 passed (709 assertions) |
+| Pint formatting | No violations | Clean after fixing an unused import |
+| `npm run build` | Success | Built in 7.01s (exit 0), pre-existing Sass/Tailwind warnings only |
 
 ## Risks, Dependencies, and Open Questions
 
@@ -129,8 +138,18 @@ Not applicable. The change makes the `images` field more permissive only in the 
 
 ## Implementation Notes and Discoveries
 
-*(To be filled in during implementation.)*
+1. **The plan's original root-cause analysis was partly wrong.** It claimed the `images` key is *absent* from the multipart payload when no files are selected, so `sometimes` should skip it. Reproduction showed the opposite: the edit form spreads the API product payload into its state (`setForm({ ...emptyProduct, ...product })`), so `form` contains `images` (an array), `offers`, and `category` (objects). The submit loop `Object.entries(form).forEach(... body.append(key, value))` therefore appends a **stringified** `images` value — `''` for a product with no images, `"[object Object]"` for a product with images. PHP receives a present, non-array `images` field and `sometimes` + `array` correctly rejects it with *"The images field must be an array."* This also explains why create never failed: `emptyProduct` has no `images`/`offers`/`category` keys.
+2. The `offers` payload happens to survive because it is appended a second time as `offers[0][vendor_id]` etc. (PHP resolves the later array-shaped keys over the stringified value, verified with `parse_str`), and `category` is not a validated field. `images` has no such second append, so it alone produced the 422.
+3. **Fixes applied:** `nullable` on `images` in both form requests (tolerates absent/null), plus a frontend guard so only keys present in `emptyProduct` are appended from the form state. Both were needed: `nullable` alone would still reject the stringified `"[object Object]"` value for products that have images.
+4. **User-requested scope addition:** the edit form now shows a muted notice instead of the file input ("Adding images while editing is disabled..."); create keeps the upload control. This aligns with the known issue that product images use the local public disk, which is not durable on Vercel.
+5. The regression test sends `images => ''` (mimicking the real browser payload after `ConvertEmptyStringsToNull`); it failed with the exact reported 422 before the fix and passes after.
+6. Test execution required Herd's PHP 8.4 (`C:/Users/artyo/.config/herd/bin/php.bat`); the PATH `php` is 8.2.12, which fails Composer's platform check (`>= 8.4.1`).
+7. Unrelated working-tree change observed during implementation: the `/run-seeder` route was removed from `routes/web.php` (not by this task); Pint then removed its now-unused `Artisan` import. The user reviewed and approved committing it together with Plan 019.
 
 ## Final Summary and Remaining Work
 
-*(To be filled in on completion.)*
+
+
+Implemented and verified. `UpdateProductRequest`/`StoreProductRequest` now use `nullable` for `images`; the React product form no longer stringifies payload objects and hides the upload control when editing. Added three regression tests (update without images, update with images, update with invalid image). Full suite: **154 passed (709 assertions)**; Pint clean; `npm run build` exit 0.
+
+Remaining work (out of scope): durable object storage for product images (see known issues); re-enable edit-mode image uploads once storage is available. Committed and pushed with the same change set as the `/run-seeder` route removal from `routes/web.php`.
